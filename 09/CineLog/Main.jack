@@ -1,0 +1,39 @@
+/*A film log app, each film featuring the following info: title, year, rating, date watched.
+After logging the films (adding them into a list), the app calculates the average rating of all the films.*/
+
+class Main {
+    function void main() {
+        var int size;
+        var int i;
+        var Film tempFilm;
+        var FilmLog log;
+        var String tempTitle;
+        var int tempYear;
+        var int tempRating;
+        var String tempDateWatched;
+        var int avg;
+        var String maxTitle;
+        let size = Keyboard.readInt("How many films would you like to log? Enter number: ");
+        let i = 0;
+        let log = FilmLog.new(size);
+        while(i < size) {
+            let tempTitle = Keyboard.readLine("Title: ");
+            let tempYear = Keyboard.readInt("Year: ");
+            let tempRating = Keyboard.readInt("Rating: ");
+            let tempDateWatched = Keyboard.readLine("Date watched: ");
+            let tempFilm = Film.new(tempTitle, tempYear, tempRating, tempDateWatched);
+            do log.addFilm(tempFilm);
+            let i = i + 1;
+            do Output.println();
+        }
+        let avg = log.getAverage();
+        let maxTitle = log.getHighestRating();
+        do Output.printString("The films rating average is ");
+        do Output.printInt(avg);
+        do Output.println();
+        do Output.printString("The film with the highest rating is: ");
+        do Output.printString(maxTitle);
+        do Output.println();
+        return;
+    }
+}

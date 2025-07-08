@@ -1,0 +1,14 @@
+function Main.sum 1
+    push argument 0  
+    if-goto RECURSE  // If n != 0, jump to RECURSE
+    push constant 0  // Base case: return 0
+    return
+
+label RECURSE
+    push argument 0  
+    push constant 1  
+    sub
+    call Main.sum 1  // sum(n-1)
+    push argument 0  
+    add              // n + sum(n-1)
+    return

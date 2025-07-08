@@ -1,0 +1,8 @@
+~~~ Luca's VM translator ~~~
+argument is directory
+output file name: SimpleAdd.asm
+.vm file found: SimpleAdd.vm
+input file read successfully
+.vm file found: test.vm
+input file read successfully
+output file written successfully

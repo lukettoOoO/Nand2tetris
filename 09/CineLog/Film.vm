@@ -1,0 +1,41 @@
+function Film.new 0
+    push constant 4
+    call Memory.alloc 1
+    pop pointer 0
+    push argument 0
+    pop this 0
+    push argument 1
+    pop this 1
+    push argument 2
+    pop this 2
+    push argument 3
+    pop this 3
+    push pointer 0
+    return
+function Film.setRating 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    pop this 2
+    push constant 0
+    return
+function Film.getTitle 0
+    push argument 0
+    pop pointer 0
+    push this 0
+    return
+function Film.getYear 0
+    push argument 0
+    pop pointer 0
+    push this 1
+    return
+function Film.getRating 0
+    push argument 0
+    pop pointer 0
+    push this 2
+    return
+function Film.getDateWatched 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    return

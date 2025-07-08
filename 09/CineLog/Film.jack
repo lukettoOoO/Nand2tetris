@@ -1,0 +1,29 @@
+class Film {
+    field String title;
+    field int year;
+    field int rating;
+    field String dateWatched;
+    constructor Film new(String atitle, int ayear, int arating, String adateWatched) {
+        let title = atitle;
+        let year = ayear;
+        let rating = arating;
+        let dateWatched = adateWatched;
+        return this;
+    }
+    method void setRating(int arating) {
+        let rating = arating;
+        return;
+    }
+    method String getTitle() {
+        return title;
+    }
+    method int getYear() {
+        return year;
+    }
+    method int getRating() {
+        return rating;
+    }
+    method String getDateWatched() {
+        return dateWatched;
+    }
+}

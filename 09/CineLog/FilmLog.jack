@@ -1,0 +1,62 @@
+class FilmLog {
+    field int size;
+    field int currentSize;
+    field Array film;
+    constructor FilmLog new(int asize) {
+        let size = asize;
+        let currentSize = 0;
+        let film = Array.new(size);
+        return this;
+    }
+    method void addFilm(Film afilm) {
+        if(currentSize < size) {
+            let film[currentSize] = afilm;
+            let currentSize = currentSize + 1;
+        }
+        else {
+            do Output.printString("The log has reached its maximum size!");
+            do Output.println();
+        }
+        return;
+    }
+    method int getAverage() {
+        var int i;
+        var int sum;
+        var Film aux;
+        if(currentSize > 0) {
+            let i = 0;
+            let sum = 0;
+            while(i < currentSize) {
+                let aux = film[i];
+                let sum = sum + aux.getRating();
+                let i = i + 1;
+            }
+            return sum / currentSize;
+        }
+        else {
+            return 0;
+        }
+    }
+    method String getHighestRating() {
+        var int i;
+        var int maxRating;
+        var String maxTitle;
+        var Film aux;
+        if(currentSize > 0) {
+            let i = 0;
+            let maxRating = 0;
+            while(i < currentSize) {
+                let aux = film[i];
+                if(aux.getRating() > maxRating) {
+                    let maxRating = aux.getRating();
+                    let maxTitle = aux.getTitle();
+                }
+                let i = i + 1;
+            }
+            return maxTitle;
+        }
+        else {
+            return "null";
+        }
+    }
+}

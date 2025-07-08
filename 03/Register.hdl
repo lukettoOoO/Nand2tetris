@@ -1,0 +1,50 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/3/a/Register.hdl
+/**
+ * 16-bit register:
+ * If load is asserted, the register's value is set to in;
+ * Otherwise, the register maintains its current value:
+ * if (load(t)) out(t+1) = int(t), else out(t+1) = out(t)
+ */
+CHIP Register {
+    IN in[16], load;
+    OUT out[16];
+
+    PARTS:
+    Mux(a=dff_out0 , b=in[0] , sel=load , out=dff_in0 );
+    DFF(in=dff_in0 , out=dff_out0, out=out[0] );
+    Mux(a=dff_out1 , b=in[1] , sel=load , out=dff_in1 );
+    DFF(in=dff_in1 , out=dff_out1, out=out[1] );
+    Mux(a=dff_out2 , b=in[2] , sel=load , out=dff_in2 );
+    DFF(in=dff_in2, out=dff_out2, out=out[2] );
+    Mux(a=dff_out3 , b=in[3] , sel=load , out=dff_in3 );
+    DFF(in=dff_in3 , out=dff_out3, out=out[3] );
+    Mux(a=dff_out4 , b=in[4] , sel=load , out=dff_in4 );
+    DFF(in=dff_in4 , out=dff_out4, out=out[4] );
+    Mux(a=dff_out5 , b=in[5] , sel=load , out=dff_in5 );
+    DFF(in=dff_in5 , out=dff_out5, out=out[5] );
+    Mux(a=dff_out6 , b=in[6] , sel=load , out=dff_in6 );
+    DFF(in=dff_in6 , out=dff_out6, out=out[6] );
+    Mux(a=dff_out7 , b=in[7] , sel=load , out=dff_in7 );
+    DFF(in=dff_in7 , out=dff_out7, out=out[7] );
+    Mux(a=dff_out8 , b=in[8] , sel=load , out=dff_in8 );
+    DFF(in=dff_in8 , out=dff_out8, out=out[8] );
+    Mux(a=dff_out9 , b=in[9] , sel=load , out=dff_in9 );
+    DFF(in=dff_in9 , out=dff_out9, out=out[9] );
+    Mux(a=dff_out10 , b=in[10] , sel=load , out=dff_in10 );
+    DFF(in=dff_in10 , out=dff_out10, out=out[10] );
+    Mux(a=dff_out11 , b=in[11] , sel=load , out=dff_in11 );
+    DFF(in=dff_in11 , out=dff_out11, out=out[11] );
+    Mux(a=dff_out12 , b=in[12] , sel=load , out=dff_in12 );
+    DFF(in=dff_in12 , out=dff_out12, out=out[12] );
+    Mux(a=dff_out13 , b=in[13] , sel=load , out=dff_in13 );
+    DFF(in=dff_in13 , out=dff_out13, out=out[13] );
+    Mux(a=dff_out14 , b=in[14] , sel=load , out=dff_in14 );
+    DFF(in=dff_in14 , out=dff_out14, out=out[14] );
+    Mux(a=dff_out15 , b=in[15] , sel=load , out=dff_in15 );
+    DFF(in=dff_in15 , out=dff_out15, out=out[15] );
+
+    
+}

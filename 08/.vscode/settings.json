@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "VMtranslator.C": "cpp",
+        "Assembler.C": "cpp",
+        "VMtranslator_nobootstrap.C": "cpp"
+    }
+}

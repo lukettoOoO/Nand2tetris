@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/luca/Documents/projects/The Elements of Computing Systems/10/JackAnalyzer'
+relocations:     []
+...
