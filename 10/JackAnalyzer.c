@@ -431,7 +431,7 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
         printf("tokenized: %s\n", fileName);
     }
 
-    FILE* outputFile = NULL; 
+    FILE* outputFile = NULL; //the output .xml file
     if(inputType(inputName) == 0) //Create an output file called Xxx.xml and prepare it for writing in the current directory
     {
         char outputName[256] = "";
@@ -480,10 +480,11 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
     printf("token size: %d\n", tokenSize);
 
     //OUTPUT TEST:
+    printf("<tokens>\n");
     for(int i = 0; i < tokenSize; i++)
     {
         //printf("%u: %s\n", tokenType(token[i]),  token[i]);
-        printf("token: %s, ", token[i]);
+        /*printf("token: %s, ", token[i]);
         printf("token type: ");
         token_type tt = tokenType(token[i]);
         char *str_const = NULL;
@@ -533,8 +534,58 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
                 free(str_const);
                 break;
         }
-        printf("\n");
+        printf("\n");*/
+        token_type tt = tokenType(token[i]);
+        char *str_const = NULL;
+        switch (tt) 
+        {  
+            case KEYWORD: 
+                printf("  <keyword> ");
+                key_type key = keyWord(token[i]);
+                switch(key)
+                {
+                    case CLASS:       printf("class"); break;
+                    case METHOD:      printf("method"); break;
+                    case FUNCTION:    printf("function"); break;
+                    case CONSTRUCTOR: printf("constructor"); break;
+                    case INT:         printf("int"); break;
+                    case BOOLEAN:     printf("boolean"); break;
+                    case CHAR:        printf("char"); break;
+                    case VOID:        printf("void"); break;
+                    case VAR:         printf("var"); break;
+                    case STATIC:      printf("static"); break;
+                    case FIELD:       printf("field"); break;
+                    case LET:         printf("let"); break;
+                    case DO:          printf("do"); break;
+                    case IF:          printf("if"); break;
+                    case ELSE:        printf("else"); break;
+                    case WHILE:       printf("while"); break;
+                    case RETURN:      printf("return"); break;
+                    case TRUE:        printf("true"); break;
+                    case FALSE:       printf("false"); break;
+                    case NULL_KEY:    printf("null"); break;
+                    case THIS:        printf("this"); break;
+                    default:          printf("unknown"); break;
+                }
+                printf(" </keyword>\n");
+                break;
+            case SYMBOL: 
+                printf("  <symbol> %c </symbol>\n", symbol(token[i]));
+                break;
+            case IDENTIFIER: 
+                printf("  <identifier> %s </identifier>\n", identifier(token[i]));
+                break;
+            case INT_CONST: 
+                printf("  <integerConstant> %d </integerConstant>\n", intVal(token[i]));
+                break;
+            case STRING_CONST: 
+                str_const = stringVal(token[i]);
+                printf("  <stringConstant> %s </stringConstant>\n", str_const);
+                free(str_const);
+                break;
+        }
     }
+    printf("</tokens>\n");
 
     if(token != NULL)
     {
