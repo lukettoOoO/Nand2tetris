@@ -1,50 +1,20 @@
 ~~~ Luca's Jack Analyzer ~~~
 argument is: file
-tokenized: Main.jack
-created output file: Main.xml
-token size: 45
-token: class, token type: KEYWORD, keyword: CLASS
-token: method, token type: KEYWORD, keyword: METHOD
-token: function, token type: KEYWORD, keyword: FUNCTION
-token: constructor, token type: KEYWORD, keyword: CONSTRUCTOR
-token: int, token type: KEYWORD, keyword: INT
-token: boolean, token type: KEYWORD, keyword: BOOLEAN
-token: char, token type: KEYWORD, keyword: CHAR
-token: void, token type: KEYWORD, keyword: VOID
-token: var, token type: KEYWORD, keyword: VAR
-token: static, token type: KEYWORD, keyword: STATIC
-token: field, token type: KEYWORD, keyword: FIELD
-token: let, token type: KEYWORD, keyword: LET
-token: do, token type: KEYWORD, keyword: DO
-token: if, token type: KEYWORD, keyword: IF
-token: else, token type: KEYWORD, keyword: ELSE
-token: while, token type: KEYWORD, keyword: WHILE
-token: return, token type: KEYWORD, keyword: RETURN
-token: true, token type: KEYWORD, keyword: TRUE
-token: false, token type: KEYWORD, keyword: FALSE
-token: null, token type: KEYWORD, keyword: NULL
-token: this, token type: KEYWORD, keyword: THIS
-token: {, token type: SYMBOL, symbol: {
-token: }, token type: SYMBOL, symbol: }
-token: (, token type: SYMBOL, symbol: (
-token: ), token type: SYMBOL, symbol: )
-token: [, token type: SYMBOL, symbol: [
-token: ], token type: SYMBOL, symbol: ]
-token: ., token type: SYMBOL, symbol: .
-token: ,, token type: SYMBOL, symbol: ,
-token: ;, token type: SYMBOL, symbol: ;
-token: +, token type: SYMBOL, symbol: +
-token: -, token type: SYMBOL, symbol: -
-token: *, token type: SYMBOL, symbol: *
-token: /, token type: SYMBOL, symbol: /
-token: &, token type: SYMBOL, symbol: &
-token: |, token type: SYMBOL, symbol: |
-token: <, token type: SYMBOL, symbol: <
-token: >, token type: SYMBOL, symbol: >
-token: =, token type: SYMBOL, symbol: =
-token: ~, token type: SYMBOL, symbol: ~
-token: Luca, token type: IDENTIFIER, identifier: Luca
-token: int_value0, token type: IDENTIFIER, identifier: int_value0
-token: 1999, token type: INT_CONST, integer value: 1999
-token: "abcde", token type: STRING_CONST, string constant: abcde
-token: "a", token type: STRING_CONST, string constant: a
+tokenized: test.jack
+created output file: test.xml
+token size: 13
+<tokens>
+  <keyword> if </keyword>
+  <symbol> ( </symbol>
+  <identifier> x </identifier>
+  <symbol> &lt </symbol>
+  <integerConstant> 153 </integerConstant>
+  <symbol> ) </symbol>
+  <symbol> { </symbol>
+  <keyword> let </keyword>
+  <identifier> city </identifier>
+  <symbol> = </symbol>
+  <stringConstant> Paris </stringConstant>
+  <symbol> ; </symbol>
+  <symbol> } </symbol>
+</tokens>

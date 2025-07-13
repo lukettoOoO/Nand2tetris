@@ -570,7 +570,16 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
                 printf(" </keyword>\n");
                 break;
             case SYMBOL: 
-                printf("  <symbol> %c </symbol>\n", symbol(token[i]));
+                if(symbol(token[i]) == '<')
+                    printf("  <symbol> &lt </symbol>\n");
+                else if(symbol(token[i]) == '>')
+                    printf("  <symbol> &gt </symbol>\n");
+                else if(symbol(token[i]) == '"')
+                    printf("  <symbol> &quot </symbol>\n");
+                else if(symbol(token[i]) == '&')
+                    printf("  <symbol> &amp </symbol>\n");
+                else
+                    printf("  <symbol> %c </symbol>\n", symbol(token[i]));
                 break;
             case IDENTIFIER: 
                 printf("  <identifier> %s </identifier>\n", identifier(token[i]));
