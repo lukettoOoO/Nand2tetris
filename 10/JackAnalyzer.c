@@ -397,7 +397,77 @@ char **JackTokenizer(const char *inputName, int *tokenSize)
 
 //CompilationEngine:
 
-void CompilationEngine(FILE* ouputFile, char** token)
+void CompileClass()
+{
+    
+}
+
+void CompileClassVarDec()
+{
+
+}
+
+void CompileSubroutine()
+{
+
+}
+
+void compileParameterList()
+{
+
+}
+
+void compileVarDec()
+{
+
+}
+
+void compileStatements()
+{
+
+}
+
+void compileDo()
+{
+
+}
+
+void compileLet()
+{
+
+}
+
+void compileWhile()
+{
+
+}
+
+void compileReturn()
+{
+
+}
+
+void compileIf()
+{
+
+}
+
+void CompileExpression()
+{
+
+}
+
+void CompileTerm()
+{
+
+}
+
+void CompileExpressionList()
+{
+
+}
+
+void CompilationEngine(FILE* outputFile, char** token) //Constructor
 {
 
 }
