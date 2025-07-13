@@ -1,20 +1,17 @@
 ~~~ Luca's Jack Analyzer ~~~
-argument is: file
-tokenized: test.jack
-created output file: test.xml
-token size: 13
-<tokens>
-  <keyword> if </keyword>
-  <symbol> ( </symbol>
-  <identifier> x </identifier>
-  <symbol> &lt </symbol>
-  <integerConstant> 153 </integerConstant>
-  <symbol> ) </symbol>
-  <symbol> { </symbol>
-  <keyword> let </keyword>
-  <identifier> city </identifier>
-  <symbol> = </symbol>
-  <stringConstant> Paris </stringConstant>
-  <symbol> ; </symbol>
-  <symbol> } </symbol>
-</tokens>
+argument is: directory
+.jack file found: Square.jack
+tokenized: Square.jack
+created output file: Square.xml
+created output tokenizer file: SquareT.xml
+token size: 559
+.jack file found: SquareGame.jack
+tokenized: SquareGame.jack
+created output file: SquareGame.xml
+created output tokenizer file: SquareGameT.xml
+token size: 313
+.jack file found: Main.jack
+tokenized: Main.jack
+created output file: Main.xml
+created output tokenizer file: MainT.xml
+token size: 124

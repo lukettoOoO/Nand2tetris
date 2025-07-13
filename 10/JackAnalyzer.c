@@ -432,9 +432,11 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
     }
 
     FILE* outputFile = NULL; //the output .xml file
+    FILE* outputTokenizerFile = NULL; //the output tokenizer .xml file (For each source file Xxx.jack, have your tokenizer give the output file the name XxxT.xml)
     if(inputType(inputName) == 0) //Create an output file called Xxx.xml and prepare it for writing in the current directory
     {
         char outputName[256] = "";
+        char outputTokenizerName[256] = "";
         for(int i = 0; i < strlen(inputName); i++)
         {
             outputName[i] = inputName[i];
@@ -442,6 +444,10 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
                 break;
         }
         outputName[strlen(outputName) - 1] = '\0'; 
+
+        strcpy(outputTokenizerName, outputName);
+        strcat(outputTokenizerName, "T.xml");
+
         strcat(outputName, ".xml");
         outputFile = fopen(outputName, "w");
         if(outputFile == NULL)
@@ -450,10 +456,20 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
             exit(EXIT_FAILURE);
         }
         printf("created output file: %s\n", outputName);
+
+        outputTokenizerFile = fopen(outputTokenizerName, "w");
+        if(outputTokenizerFile == NULL)
+        {
+            fprintf(stderr, "(analyzerLogic): error opening output tokenizer file\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("created output tokenizer file: %s\n", outputTokenizerName);
+
     }
     else if(inputType(inputName) == 1) //Create an output file called Xxx.xml and prepare it for writing in the directory given by input
     {
         char outputName[256] = "";
+        char outputTokenizerName[256] = "";
         for(int i = 0; i < strlen(fileName); i++)
         {
             outputName[i] = fileName[i];
@@ -461,6 +477,10 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
                 break;
         }
         outputName[strlen(outputName) - 1] = '\0'; 
+
+        strcpy(outputTokenizerName, outputName);
+        strcat(outputTokenizerName, "T.xml");
+
         strcat(outputName, ".xml");
 
         char outputPath[4097] = "";
@@ -468,6 +488,13 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
         strcat(outputPath, inputName);
         strcat(outputPath, "/");
         strcat(outputPath, outputName);
+
+        char outputPathTokenizer[4097] = "";
+        strcat(outputPathTokenizer, "./");
+        strcat(outputPathTokenizer, inputName);
+        strcat(outputPathTokenizer, "/");
+        strcat(outputPathTokenizer, outputTokenizerName);
+
         outputFile = fopen(outputPath, "w");
         if(outputFile == NULL)
         {
@@ -476,125 +503,81 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
         }
         //printf("current output path: %s\n", outputPath);
         printf("created output file: %s\n", outputName);
+
+        outputTokenizerFile = fopen(outputPathTokenizer, "w");
+        if(outputTokenizerFile == NULL)
+        {
+            fprintf(stderr, "(analyzerLogic): error opening output tokenizer file\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("created output tokenizer file: %s\n", outputTokenizerName);
     }
     printf("token size: %d\n", tokenSize);
 
-    //OUTPUT TEST:
-    printf("<tokens>\n");
+    //tokenizer output:
+    fprintf(outputTokenizerFile, "<tokens>\n");
     for(int i = 0; i < tokenSize; i++)
     {
-        //printf("%u: %s\n", tokenType(token[i]),  token[i]);
-        /*printf("token: %s, ", token[i]);
-        printf("token type: ");
         token_type tt = tokenType(token[i]);
         char *str_const = NULL;
         switch (tt) 
         {  
             case KEYWORD: 
-                printf("KEYWORD, keyword: ");
+                fprintf(outputTokenizerFile, "<keyword> ");
                 key_type key = keyWord(token[i]);
                 switch(key)
                 {
-                    case CLASS:       printf("CLASS"); break;
-                    case METHOD:      printf("METHOD"); break;
-                    case FUNCTION:    printf("FUNCTION"); break;
-                    case CONSTRUCTOR: printf("CONSTRUCTOR"); break;
-                    case INT:         printf("INT"); break;
-                    case BOOLEAN:     printf("BOOLEAN"); break;
-                    case CHAR:        printf("CHAR"); break;
-                    case VOID:        printf("VOID"); break;
-                    case VAR:         printf("VAR"); break;
-                    case STATIC:      printf("STATIC"); break;
-                    case FIELD:       printf("FIELD"); break;
-                    case LET:         printf("LET"); break;
-                    case DO:          printf("DO"); break;
-                    case IF:          printf("IF"); break;
-                    case ELSE:        printf("ELSE"); break;
-                    case WHILE:       printf("WHILE"); break;
-                    case RETURN:      printf("RETURN"); break;
-                    case TRUE:        printf("TRUE"); break;
-                    case FALSE:       printf("FALSE"); break;
-                    case NULL_KEY:    printf("NULL"); break;
-                    case THIS:        printf("THIS"); break;
-                    default:          printf("UNKNOWN"); break;
+                    case CLASS:       fprintf(outputTokenizerFile, "class"); break;
+                    case METHOD:      fprintf(outputTokenizerFile, "method"); break;
+                    case FUNCTION:    fprintf(outputTokenizerFile, "function"); break;
+                    case CONSTRUCTOR: fprintf(outputTokenizerFile, "constructor"); break;
+                    case INT:         fprintf(outputTokenizerFile, "int"); break;
+                    case BOOLEAN:     fprintf(outputTokenizerFile, "boolean"); break;
+                    case CHAR:        fprintf(outputTokenizerFile, "char"); break;
+                    case VOID:        fprintf(outputTokenizerFile, "void"); break;
+                    case VAR:         fprintf(outputTokenizerFile, "var"); break;
+                    case STATIC:      fprintf(outputTokenizerFile, "static"); break;
+                    case FIELD:       fprintf(outputTokenizerFile, "field"); break;
+                    case LET:         fprintf(outputTokenizerFile, "let"); break;
+                    case DO:          fprintf(outputTokenizerFile, "do"); break;
+                    case IF:          fprintf(outputTokenizerFile, "if"); break;
+                    case ELSE:        fprintf(outputTokenizerFile, "else"); break;
+                    case WHILE:       fprintf(outputTokenizerFile, "while"); break;
+                    case RETURN:      fprintf(outputTokenizerFile, "return"); break;
+                    case TRUE:        fprintf(outputTokenizerFile, "true"); break;
+                    case FALSE:       fprintf(outputTokenizerFile, "false"); break;
+                    case NULL_KEY:    fprintf(outputTokenizerFile, "null"); break;
+                    case THIS:        fprintf(outputTokenizerFile, "this"); break;
+                    default:          fprintf(outputTokenizerFile, "unknown"); break;
                 }
-                break;
-            case SYMBOL: 
-                printf("SYMBOL, symbol: %c", symbol(token[i]));
-                break;
-            case IDENTIFIER: 
-                printf("IDENTIFIER, identifier: %s", identifier(token[i]));
-                break;
-            case INT_CONST: 
-                printf("INT_CONST, integer value: %d", intVal(token[i]));
-                break;
-            case STRING_CONST: 
-                str_const = stringVal(token[i]);
-                printf("STRING_CONST, string constant: %s", str_const);
-                free(str_const);
-                break;
-        }
-        printf("\n");*/
-        token_type tt = tokenType(token[i]);
-        char *str_const = NULL;
-        switch (tt) 
-        {  
-            case KEYWORD: 
-                printf("  <keyword> ");
-                key_type key = keyWord(token[i]);
-                switch(key)
-                {
-                    case CLASS:       printf("class"); break;
-                    case METHOD:      printf("method"); break;
-                    case FUNCTION:    printf("function"); break;
-                    case CONSTRUCTOR: printf("constructor"); break;
-                    case INT:         printf("int"); break;
-                    case BOOLEAN:     printf("boolean"); break;
-                    case CHAR:        printf("char"); break;
-                    case VOID:        printf("void"); break;
-                    case VAR:         printf("var"); break;
-                    case STATIC:      printf("static"); break;
-                    case FIELD:       printf("field"); break;
-                    case LET:         printf("let"); break;
-                    case DO:          printf("do"); break;
-                    case IF:          printf("if"); break;
-                    case ELSE:        printf("else"); break;
-                    case WHILE:       printf("while"); break;
-                    case RETURN:      printf("return"); break;
-                    case TRUE:        printf("true"); break;
-                    case FALSE:       printf("false"); break;
-                    case NULL_KEY:    printf("null"); break;
-                    case THIS:        printf("this"); break;
-                    default:          printf("unknown"); break;
-                }
-                printf(" </keyword>\n");
+                fprintf(outputTokenizerFile, " </keyword>\n");
                 break;
             case SYMBOL: 
                 if(symbol(token[i]) == '<')
-                    printf("  <symbol> &lt </symbol>\n");
+                    fprintf(outputTokenizerFile, "<symbol> &lt; </symbol>\n");
                 else if(symbol(token[i]) == '>')
-                    printf("  <symbol> &gt </symbol>\n");
+                    fprintf(outputTokenizerFile, "<symbol> &gt; </symbol>\n");
                 else if(symbol(token[i]) == '"')
-                    printf("  <symbol> &quot </symbol>\n");
+                    fprintf(outputTokenizerFile, "<symbol> &quot; </symbol>\n");
                 else if(symbol(token[i]) == '&')
-                    printf("  <symbol> &amp </symbol>\n");
+                    fprintf(outputTokenizerFile, "<symbol> &amp; </symbol>\n");
                 else
-                    printf("  <symbol> %c </symbol>\n", symbol(token[i]));
+                    fprintf(outputTokenizerFile, "<symbol> %c </symbol>\n", symbol(token[i]));
                 break;
             case IDENTIFIER: 
-                printf("  <identifier> %s </identifier>\n", identifier(token[i]));
+                fprintf(outputTokenizerFile, "<identifier> %s </identifier>\n", identifier(token[i]));
                 break;
             case INT_CONST: 
-                printf("  <integerConstant> %d </integerConstant>\n", intVal(token[i]));
+                fprintf(outputTokenizerFile, "<integerConstant> %d </integerConstant>\n", intVal(token[i]));
                 break;
             case STRING_CONST: 
                 str_const = stringVal(token[i]);
-                printf("  <stringConstant> %s </stringConstant>\n", str_const);
+                fprintf(outputTokenizerFile, "<stringConstant> %s </stringConstant>\n", str_const);
                 free(str_const);
                 break;
         }
     }
-    printf("</tokens>\n");
+    fprintf(outputTokenizerFile, "</tokens>\n");
 
     if(token != NULL)
     {
@@ -610,6 +593,7 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
     CompilationEngine(outputFile, token); //Use the CompilationEngine to compile the input JackTokenizer into the output file
 
     fclose(outputFile);
+    fclose(outputTokenizerFile);
 }
 
 void JackAnalyzer(char *inputName)
