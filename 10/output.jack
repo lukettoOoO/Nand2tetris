@@ -1,17 +1,7 @@
 ~~~ Luca's Jack Analyzer ~~~
 argument is: directory
-.jack file found: Square.jack
-tokenized: Square.jack
-created output file: Square.xml
-created output tokenizer file: SquareT.xml
-token size: 559
-.jack file found: SquareGame.jack
-tokenized: SquareGame.jack
-created output file: SquareGame.xml
-created output tokenizer file: SquareGameT.xml
-token size: 313
 .jack file found: Main.jack
 tokenized: Main.jack
 created output file: Main.xml
 created output tokenizer file: MainT.xml
-token size: 124
+token size: 140

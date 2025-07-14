@@ -15,6 +15,8 @@ char *inputStream = NULL; //contents of the input file/files
 int inputSize = 0; //size of the current input file
 char currentToken[MAX_HACK_SIZE];
 int currentTokenIndex = 0;
+int currentCompileTokenIndex = 0;
+int indentLevel = 0;
 
 char *symbolList = "{}()[].,;+-*/&|<>=~";
 char *keywordList[] = {"class", "constructor", "function",
@@ -397,19 +399,157 @@ char **JackTokenizer(const char *inputName, int *tokenSize)
 
 //CompilationEngine:
 
-void CompileClass()
+//variables to keep in mind: outputFile (not global), token (not global), currentCompileTokenIndex (global), indentLevel (global)
+
+void printToken(FILE* outputFile, char **token)
 {
-    
+    token_type tt = tokenType(token[currentCompileTokenIndex]);
+    char *str_const = NULL;
+    switch (tt) 
+    {  
+        case KEYWORD: 
+            fprintf(outputFile, "<keyword> ");
+            key_type key = keyWord(token[currentCompileTokenIndex]);
+            switch(key)
+            {
+                case CLASS:       fprintf(outputFile, "class"); break;
+                case METHOD:      fprintf(outputFile, "method"); break;
+                case FUNCTION:    fprintf(outputFile, "function"); break;
+                case CONSTRUCTOR: fprintf(outputFile, "constructor"); break;
+                case INT:         fprintf(outputFile, "int"); break;
+                case BOOLEAN:     fprintf(outputFile, "boolean"); break;
+                case CHAR:        fprintf(outputFile, "char"); break;
+                case VOID:        fprintf(outputFile, "void"); break;
+                case VAR:         fprintf(outputFile, "var"); break;
+                case STATIC:      fprintf(outputFile, "static"); break;
+                case FIELD:       fprintf(outputFile, "field"); break;
+                case LET:         fprintf(outputFile, "let"); break;
+                case DO:          fprintf(outputFile, "do"); break;
+                case IF:          fprintf(outputFile, "if"); break;
+                case ELSE:        fprintf(outputFile, "else"); break;
+                case WHILE:       fprintf(outputFile, "while"); break;
+                case RETURN:      fprintf(outputFile, "return"); break;
+                case TRUE:        fprintf(outputFile, "true"); break;
+                case FALSE:       fprintf(outputFile, "false"); break;
+                case NULL_KEY:    fprintf(outputFile, "null"); break;
+                case THIS:        fprintf(outputFile, "this"); break;
+                default:          fprintf(outputFile, "unknown"); break;
+            }
+            fprintf(outputFile, " </keyword>\n");
+            break;
+        case SYMBOL: 
+            if(symbol(token[currentCompileTokenIndex]) == '<')
+                fprintf(outputFile, "<symbol> &lt; </symbol>\n");
+            else if(symbol(token[currentCompileTokenIndex]) == '>')
+                fprintf(outputFile, "<symbol> &gt; </symbol>\n");
+            else if(symbol(token[currentCompileTokenIndex]) == '"')
+                fprintf(outputFile, "<symbol> &quot; </symbol>\n");
+            else if(symbol(token[currentCompileTokenIndex]) == '&')
+                fprintf(outputFile, "<symbol> &amp; </symbol>\n");
+            else
+                fprintf(outputFile, "<symbol> %c </symbol>\n", symbol(token[currentCompileTokenIndex]));
+            break;
+        case IDENTIFIER: 
+            fprintf(outputFile, "<identifier> %s </identifier>\n", identifier(token[currentCompileTokenIndex]));
+            break;
+        case INT_CONST: 
+            fprintf(outputFile, "<integerConstant> %d </integerConstant>\n", intVal(token[currentCompileTokenIndex]));
+            break;
+        case STRING_CONST: 
+            str_const = stringVal(token[currentCompileTokenIndex]);
+            fprintf(outputFile, "<stringConstant> %s </stringConstant>\n", str_const);
+            free(str_const);
+            break;
+    }
 }
 
-void CompileClassVarDec()
+void printIndent(FILE* outputFile)
+{
+    for(int i = 0; i < indentLevel * 2; i++)
+    {
+        fprintf(outputFile, " ");
+    }
+}
+
+bool isClassVarDec(char *token)
+{
+    if(strcmp(token, "static") == 0 || strcmp(token, "field") == 0)
+        return true;
+    return false;
+}
+
+void CompileClassVarDec(FILE* outputFile, char **token)
+{
+    //classVarDec: ('static' | 'field') type varName (',' varName)* ';'
+    printIndent(outputFile);
+    fprintf(outputFile, "<classVarDec>\n");
+    indentLevel++;
+
+    //('static' | 'field')
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //type
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //varName
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //(',' varName)*
+    while(strcmp(token[currentCompileTokenIndex], ",") == 0)
+    {
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+    }
+    //';'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</classVarDec>\n");
+}
+
+void CompileSubroutine(FILE* outputFile, char **token)
 {
 
 }
 
-void CompileSubroutine()
+void CompileClass(FILE* outputFile, char **token)
 {
+    //class: 'class' className '{' classVarDec* subroutineDec* '}'
+    indentLevel++;
+    fprintf(outputFile, "<class>\n");
+    //'class'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //className
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //{
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //classVarDec*
+    while(isClassVarDec(token[currentCompileTokenIndex]))
+        CompileClassVarDec(outputFile, token);
+    //subroutineDec*
+    CompileSubroutine(outputFile, token);
+    //}
+    printIndent(outputFile);
+    printToken(outputFile, token);
 
+    indentLevel--;
+    fprintf(outputFile, "</class>\n");
 }
 
 void compileParameterList()
@@ -469,7 +609,7 @@ void CompileExpressionList()
 
 void CompilationEngine(FILE* outputFile, char** token) //Constructor
 {
-
+    CompileClass(outputFile, token);
 }
 
 //JackAnalyzer:
@@ -649,6 +789,8 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
     }
     fprintf(outputTokenizerFile, "</tokens>\n");
 
+    CompilationEngine(outputFile, token); //Use the CompilationEngine to compile the input JackTokenizer into the output file
+
     if(token != NULL)
     {
         for(int i = 0; i < tokenSize; i++)
@@ -659,8 +801,6 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
         if(token != NULL)
             free(token);
     }
-
-    CompilationEngine(outputFile, token); //Use the CompilationEngine to compile the input JackTokenizer into the output file
 
     fclose(outputFile);
     fclose(outputTokenizerFile);

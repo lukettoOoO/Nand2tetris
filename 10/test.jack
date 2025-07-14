@@ -1,2 +1,4 @@
-if(x < 153)
-    {let city="Paris";}
+class Main {
+  static int x, y;
+  field boolean isOn;
+}
