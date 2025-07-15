@@ -478,6 +478,13 @@ bool isClassVarDec(char *token)
     return false;
 }
 
+bool isSubroutineDec(char* token)
+{
+    if(strcmp(token, "constructor") == 0 || strcmp(token, "function") == 0 || strcmp(token, "method") == 0)
+        return true;
+    return false;
+}
+
 void CompileClassVarDec(FILE* outputFile, char **token)
 {
     //classVarDec: ('static' | 'field') type varName (',' varName)* ';'
@@ -517,9 +524,146 @@ void CompileClassVarDec(FILE* outputFile, char **token)
     fprintf(outputFile, "</classVarDec>\n");
 }
 
+void compileParameterList(FILE* outputFile, char **token)
+{   
+    //((type varName) (',' type varName)*)?
+    //type
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //varName
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    while(strcmp(token[currentCompileTokenIndex], ",") == 0)
+    {
+        //','
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //type
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //varName
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+    }
+}
+
+void compileVarDec(FILE* outputFile, char **token)
+{
+    //'var' type varName (',' varName)* ';'
+    printIndent(outputFile);
+    fprintf(outputFile, "<varDec>\n");
+    indentLevel++;
+
+    //'var'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //type
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //varName
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //(',' varName)*
+    while(strcmp(token[currentCompileTokenIndex], ",") == 0)
+    {
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+    }
+    //';'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</varDec>\n");
+}
+
+void compileStatements(FILE* outputFile, char **token)
+{
+    printIndent(outputFile);
+    fprintf(outputFile, "<statements>\n");
+    indentLevel++;
+
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</statements>\n");
+}
+
 void CompileSubroutine(FILE* outputFile, char **token)
 {
+    //subroutineDec: ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
+    printIndent(outputFile);
+    fprintf(outputFile, "<subroutineDec>\n");
+    indentLevel++;
 
+    //('constructor' | 'function' | 'method')
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //('void' | type)
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //subroutineName
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //'('
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //parameterList
+    printIndent(outputFile);
+    fprintf(outputFile, "<parameterList>\n");
+    indentLevel++;
+    if(strcmp(token[currentCompileTokenIndex], ")") != 0)
+        compileParameterList(outputFile, token);
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</parameterList>\n");
+    //')'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+
+    //subroutineBody
+    //'{' varDec* statements '}'
+    printIndent(outputFile);
+    fprintf(outputFile, "<subroutineBody>\n");
+    indentLevel++;
+    //'{'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //varDec*
+    compileVarDec(outputFile, token);
+    //statements
+    compileStatements(outputFile, token);
+    //'}'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</subroutineBody>\n");
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</subroutineDec>\n");
 }
 
 void CompileClass(FILE* outputFile, char **token)
@@ -543,28 +687,14 @@ void CompileClass(FILE* outputFile, char **token)
     while(isClassVarDec(token[currentCompileTokenIndex]))
         CompileClassVarDec(outputFile, token);
     //subroutineDec*
-    CompileSubroutine(outputFile, token);
+    while(isSubroutineDec(token[currentCompileTokenIndex]))
+        CompileSubroutine(outputFile, token);
     //}
     printIndent(outputFile);
     printToken(outputFile, token);
 
     indentLevel--;
     fprintf(outputFile, "</class>\n");
-}
-
-void compileParameterList()
-{
-
-}
-
-void compileVarDec()
-{
-
-}
-
-void compileStatements()
-{
-
 }
 
 void compileDo()

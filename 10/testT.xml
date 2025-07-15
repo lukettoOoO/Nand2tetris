@@ -1,16 +1,27 @@
 <tokens>
 <keyword> class </keyword>
-<identifier> Main </identifier>
+<identifier> Example </identifier>
 <symbol> { </symbol>
-<keyword> static </keyword>
+<keyword> field </keyword>
 <keyword> int </keyword>
 <identifier> x </identifier>
-<symbol> , </symbol>
-<identifier> y </identifier>
 <symbol> ; </symbol>
-<keyword> field </keyword>
+<keyword> static </keyword>
 <keyword> boolean </keyword>
-<identifier> isOn </identifier>
+<identifier> flag </identifier>
+<symbol> , </symbol>
+<identifier> flag1 </identifier>
 <symbol> ; </symbol>
+<keyword> function </keyword>
+<keyword> void </keyword>
+<identifier> doNothing </identifier>
+<symbol> ( </symbol>
+<symbol> ) </symbol>
+<symbol> { </symbol>
+<keyword> var </keyword>
+<keyword> int </keyword>
+<identifier> x </identifier>
+<symbol> ; </symbol>
+<symbol> } </symbol>
 <symbol> } </symbol>
 </tokens>

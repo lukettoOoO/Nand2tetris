@@ -1,4 +1,8 @@
-class Main {
-  static int x, y;
-  field boolean isOn;
+class Example {
+    field int x;
+    static boolean flag, flag1;
+
+    function void doNothing() {
+        var int x;
+    }
 }
