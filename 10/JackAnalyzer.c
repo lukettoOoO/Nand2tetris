@@ -591,12 +591,242 @@ void compileVarDec(FILE* outputFile, char **token)
     fprintf(outputFile, "</varDec>\n");
 }
 
+void CompileExpression(FILE* outputFile, char** token)
+{
+    //expression: term (op term)*
+    printIndent(outputFile);
+    fprintf(outputFile, "<expression>\n");
+    indentLevel++;
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</expression>\n");
+}
+
+void CompileExpressionList(FILE* outputFile, char** token)
+{
+
+}
+
+void compileStatements(FILE* outputFile, char **token);
+
+void compileDo(FILE* outputFile, char** token)
+{
+    //doStatement: 'do' subroutineCall ';'
+    printIndent(outputFile);
+    fprintf(outputFile, "<doStatement>\n");
+    indentLevel++;
+
+    //'do'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //subroutineCall: subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
+
+    //';'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</doStatement>\n");
+}
+
+void compileLet(FILE* outputFile, char** token)
+{
+    //letStatement: 'let' varName ('[' expression ']')? '=' expression ';'
+    printIndent(outputFile);
+    fprintf(outputFile, "<letStatement>\n");
+    indentLevel++;
+
+    //'let'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //varName
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //('[' expression ']')?
+    if(strcmp(token[currentCompileTokenIndex], "[") == 0)
+    {
+        //'['
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //expression
+        CompileExpression(outputFile, token);
+        //']'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+    }
+    //'='
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //expression
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //';'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</letStatement>\n");
+}
+
+void compileWhile(FILE* outputFile, char** token)
+{
+    //whileStatement: 'while' '(' expression ')' '{' statements '}'
+    printIndent(outputFile);
+    fprintf(outputFile, "<whileStatement>\n");
+    indentLevel++;
+
+    //'while'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //'('
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //expression
+    CompileExpression(outputFile, token);
+    //')'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //'{'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //statements
+    compileStatements(outputFile, token);
+    //'}'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</whileStatement>\n");
+}
+
+void compileReturn(FILE* outputFile, char** token)
+{
+    //'return' expression? ';'
+    printIndent(outputFile);
+    fprintf(outputFile, "<returnStatement>\n");
+    indentLevel++;
+
+    //'return'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //expression?
+    if(strcmp(token[currentCompileTokenIndex], ";") != 0)
+    {
+        CompileExpression(outputFile, token);
+    }
+    //';'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</returnStatement>\n");
+}
+
+void compileIf(FILE* outputFile, char** token)
+{
+    //'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
+    printIndent(outputFile);
+    fprintf(outputFile, "<ifStatement>\n");
+    indentLevel++;
+
+    //'if'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //'('
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //expression
+    CompileExpression(outputFile, token);
+    //')'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //'{'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //statements
+    compileStatements(outputFile, token);
+    //'}'
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    //('else' '{' statements '}')?
+    if(strcmp(token[currentCompileTokenIndex], "else") == 0)
+    {
+        //'else'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //'{'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //statements
+        compileStatements(outputFile, token);
+        //'}'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+    }
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</ifStatement>\n");
+}
+
 void compileStatements(FILE* outputFile, char **token)
 {
+    //statements: statement*
     printIndent(outputFile);
     fprintf(outputFile, "<statements>\n");
     indentLevel++;
 
+    //statement: letStatement | ifStatement | whileStatement | doStatement | returnStatement
+    while(strcmp(token[currentCompileTokenIndex], "let") == 0)
+    {
+        compileLet(outputFile, token);
+    }
+    while(strcmp(token[currentCompileTokenIndex], "if") == 0)
+    {
+        compileIf(outputFile, token);
+    }
+    while(strcmp(token[currentCompileTokenIndex], "while") == 0)
+    {
+        compileWhile(outputFile, token);
+    }
+    while(strcmp(token[currentCompileTokenIndex], "do") == 0)
+    {
+        compileDo(outputFile, token);
+    }
+    while(strcmp(token[currentCompileTokenIndex], "return") == 0)
+    {
+        compileReturn(outputFile, token);
+    }
 
     indentLevel--;
     printIndent(outputFile);
@@ -650,7 +880,8 @@ void CompileSubroutine(FILE* outputFile, char **token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //varDec*
-    compileVarDec(outputFile, token);
+    while(strcmp(token[currentCompileTokenIndex], "var") == 0)
+        compileVarDec(outputFile, token);
     //statements
     compileStatements(outputFile, token);
     //'}'
@@ -697,42 +928,7 @@ void CompileClass(FILE* outputFile, char **token)
     fprintf(outputFile, "</class>\n");
 }
 
-void compileDo()
-{
-
-}
-
-void compileLet()
-{
-
-}
-
-void compileWhile()
-{
-
-}
-
-void compileReturn()
-{
-
-}
-
-void compileIf()
-{
-
-}
-
-void CompileExpression()
-{
-
-}
-
 void CompileTerm()
-{
-
-}
-
-void CompileExpressionList()
 {
 
 }

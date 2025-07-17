@@ -32,7 +32,80 @@
         <identifier> x </identifier>
         <symbol> ; </symbol>
       </varDec>
+      <varDec>
+        <keyword> var </keyword>
+        <keyword> int </keyword>
+        <identifier> y </identifier>
+        <symbol> ; </symbol>
+      </varDec>
       <statements>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> x </identifier>
+          <symbol> [ </symbol>
+          <expression>
+          </expression>
+          <symbol> ] </symbol>
+          <symbol> = </symbol>
+          <integerConstant> 0 </integerConstant>
+          <symbol> ; </symbol>
+        </letStatement>
+        <ifStatement>
+          <keyword> if </keyword>
+          <symbol> ( </symbol>
+          <expression>
+          </expression>
+          <symbol> ) </symbol>
+          <symbol> { </symbol>
+          <statements>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> x </identifier>
+              <symbol> = </symbol>
+              <integerConstant> 1 </integerConstant>
+              <symbol> ; </symbol>
+            </letStatement>
+          </statements>
+          <symbol> } </symbol>
+          <keyword> else </keyword>
+          <symbol> { </symbol>
+          <statements>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> x </identifier>
+              <symbol> = </symbol>
+              <integerConstant> 2 </integerConstant>
+              <symbol> ; </symbol>
+            </letStatement>
+          </statements>
+          <symbol> } </symbol>
+        </ifStatement>
+        <whileStatement>
+          <keyword> while </keyword>
+          <symbol> ( </symbol>
+          <expression>
+          </expression>
+          <symbol> ) </symbol>
+          <symbol> { </symbol>
+          <statements>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> x </identifier>
+              <symbol> = </symbol>
+              <integerConstant> 3 </integerConstant>
+              <symbol> ; </symbol>
+            </letStatement>
+          </statements>
+          <symbol> } </symbol>
+        </whileStatement>
+        <doStatement>
+          <keyword> do </keyword>
+          <symbol> ; </symbol>
+        </doStatement>
+        <returnStatement>
+          <keyword> return </keyword>
+          <symbol> ; </symbol>
+        </returnStatement>
       </statements>
       <symbol> } </symbol>
     </subroutineBody>
