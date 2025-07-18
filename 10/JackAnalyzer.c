@@ -485,6 +485,21 @@ bool isSubroutineDec(char* token)
     return false;
 }
 
+bool isOp(char* token)
+{
+    if(strcmp(token, "+") == 0 ||
+        strcmp(token, "-") == 0 ||
+        strcmp(token, "*") == 0 ||
+        strcmp(token, "/") == 0 ||
+        strcmp(token, "&") == 0 ||
+        strcmp(token, "|") == 0 ||
+        strcmp(token, "<") == 0 ||
+        strcmp(token, ">") == 0 ||
+        strcmp(token, "=") == 0)
+        return true;
+    return false;
+}
+
 void CompileClassVarDec(FILE* outputFile, char **token)
 {
     //classVarDec: ('static' | 'field') type varName (',' varName)* ';'
@@ -591,6 +606,120 @@ void compileVarDec(FILE* outputFile, char **token)
     fprintf(outputFile, "</varDec>\n");
 }
 
+void CompileExpression(FILE* outputFile, char** token);
+
+void CompileExpressionList(FILE* outputFile, char** token)
+{
+    //expressionList: (expression (',' expression)*)?
+    printIndent(outputFile);
+    fprintf(outputFile, "<expressionList>\n");
+    indentLevel++;
+
+    if(strcmp(token[currentCompileTokenIndex], ")") != 0)
+    {
+        //expression
+        CompileExpression(outputFile, token);
+        while(strcmp(token[currentCompileTokenIndex], ",") == 0)
+        {
+            //','
+            printIndent(outputFile);
+            printToken(outputFile, token);
+            currentCompileTokenIndex++;
+            //expression
+            CompileExpression(outputFile, token);
+        }
+    }
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</expressionList>\n");
+}
+
+void CompileTerm(FILE* outputFile, char** token)
+{
+    //term: integerConstant | stringConstant | keywordConstant | varName | varName '[' expression ']' | subroutineCall | '(' expression ')' | unaryOp term
+    if(strcmp(token[currentCompileTokenIndex], "-") == 0 || strcmp(token[currentCompileTokenIndex], "~") == 0)
+    {
+        //unaryOp
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //term
+        CompileTerm(outputFile, token);
+    }
+    else if(strcmp(token[currentCompileTokenIndex], "(") == 0)
+    {
+        //'('
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //expression
+        CompileExpression(outputFile, token);
+        //')'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+    }
+    else
+    {
+        //integerConstant | stringConstant | keywordConstant | varName | subroutineName | className
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        if(strcmp(token[currentCompileTokenIndex], "[") == 0) //varName '[' expression ']'
+        {
+            //'['
+            printIndent(outputFile);
+            printToken(outputFile, token);
+            currentCompileTokenIndex++;
+            //expression
+            CompileExpression(outputFile, token);
+            //']'
+            printIndent(outputFile);
+            printToken(outputFile, token);
+            currentCompileTokenIndex++;
+        }
+        else if(strcmp(token[currentCompileTokenIndex], "(") == 0) //subroutineCall: subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
+        {
+            if(strcmp(token[currentCompileTokenIndex + 1], "(") == 0)
+            {
+                //'('
+                printIndent(outputFile);
+                printToken(outputFile, token);
+                currentCompileTokenIndex++;
+                //expressionList
+                CompileExpressionList(outputFile, token);
+                //')'
+                printIndent(outputFile);
+                printToken(outputFile, token);
+                currentCompileTokenIndex++;
+            }
+            else if(strcmp(token[currentCompileTokenIndex + 1], ".") == 0)
+            {
+                //'.'
+                printIndent(outputFile);
+                printToken(outputFile, token);
+                currentCompileTokenIndex++;
+                //subroutineName
+                printIndent(outputFile);
+                printToken(outputFile, token);
+                currentCompileTokenIndex++;
+                //'('
+                printIndent(outputFile);
+                printToken(outputFile, token);
+                currentCompileTokenIndex++;
+                //expressionList
+                CompileExpressionList(outputFile, token);
+                //')'
+                printIndent(outputFile);
+                printToken(outputFile, token);
+                currentCompileTokenIndex++;
+            }
+        }
+    }
+    //printf("COMPILE TERM DONE\n");
+}
+
 void CompileExpression(FILE* outputFile, char** token)
 {
     //expression: term (op term)*
@@ -598,14 +727,18 @@ void CompileExpression(FILE* outputFile, char** token)
     fprintf(outputFile, "<expression>\n");
     indentLevel++;
 
+    CompileTerm(outputFile, token);
+    while(isOp(token[currentCompileTokenIndex]))
+        {
+            printIndent(outputFile);
+            printToken(outputFile, token);
+            currentCompileTokenIndex++;
+            CompileTerm(outputFile, token);
+        }
+
     indentLevel--;
     printIndent(outputFile);
     fprintf(outputFile, "</expression>\n");
-}
-
-void CompileExpressionList(FILE* outputFile, char** token)
-{
-
 }
 
 void compileStatements(FILE* outputFile, char **token);
@@ -926,11 +1059,6 @@ void CompileClass(FILE* outputFile, char **token)
 
     indentLevel--;
     fprintf(outputFile, "</class>\n");
-}
-
-void CompileTerm()
-{
-
 }
 
 void CompilationEngine(FILE* outputFile, char** token) //Constructor

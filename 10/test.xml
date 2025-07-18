@@ -44,6 +44,7 @@
           <identifier> x </identifier>
           <symbol> [ </symbol>
           <expression>
+            <integerConstant> 0 </integerConstant>
           </expression>
           <symbol> ] </symbol>
           <symbol> = </symbol>
@@ -54,6 +55,9 @@
           <keyword> if </keyword>
           <symbol> ( </symbol>
           <expression>
+            <identifier> x </identifier>
+            <symbol> &lt; </symbol>
+            <identifier> y </identifier>
           </expression>
           <symbol> ) </symbol>
           <symbol> { </symbol>
@@ -84,6 +88,9 @@
           <keyword> while </keyword>
           <symbol> ( </symbol>
           <expression>
+            <identifier> x </identifier>
+            <symbol> &lt; </symbol>
+            <integerConstant> 10 </integerConstant>
           </expression>
           <symbol> ) </symbol>
           <symbol> { </symbol>
@@ -100,15 +107,11 @@
         </whileStatement>
         <doStatement>
           <keyword> do </keyword>
-          <symbol> ; </symbol>
+          <identifier> Output </identifier>
         </doStatement>
-        <returnStatement>
-          <keyword> return </keyword>
-          <symbol> ; </symbol>
-        </returnStatement>
       </statements>
-      <symbol> } </symbol>
+      <symbol> . </symbol>
     </subroutineBody>
   </subroutineDec>
-  <symbol> } </symbol>
+  <identifier> printInt </identifier>
 </class>

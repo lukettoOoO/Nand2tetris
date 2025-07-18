@@ -5,16 +5,25 @@ class Example {
     function void doNothing() {
         var int x;
         var int y;
-        let x[] = 0;
-        if () {
+        
+        // Assign a value to an array element - assuming x is an array
+        let x[0] = 0;
+
+        // if-statement with condition
+        if (x < y) {
             let x = 1;
         } else {
             let x = 2;
         }
-        while () {
+
+        // while-statement with condition
+        while (x < 10) {
             let x = 3;
         }
-        do;
+
+        // do-statement calling a subroutine
+        do Output.printInt(x);
+
         return;
     }
 }
