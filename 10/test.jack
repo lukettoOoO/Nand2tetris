@@ -1,29 +1,47 @@
-class Example {
-    field int x;
-    static boolean flag, flag1;
+class Test {
+    static int count;
+    field boolean flag;
 
-    function void doNothing() {
-        var int x;
-        var int y;
-        
-        // Assign a value to an array element - assuming x is an array
-        let x[0] = 0;
+    constructor Test new(int size) {
+        var Array a;
+        let a = Array.new(size);
+        return this;
+    }
 
-        // if-statement with condition
-        if (x < y) {
-            let x = 1;
+    method void setFlag(boolean value) {
+        let flag = value;
+        return;
+    }
+
+    function void compute() {
+        var int i, sum;
+        let i = 0;
+        let sum = 0;
+
+        while (i < 10) {
+            let sum = sum + i;
+            let i = i + 1;
+        }
+
+        if (sum > 20) {
+            do Output.printString("Sum is large");
         } else {
-            let x = 2;
+            do Output.printString("Sum is small");
         }
 
-        // while-statement with condition
-        while (x < 10) {
-            let x = 3;
-        }
+        let count = sum;
 
-        // do-statement calling a subroutine
+        do Output.printInt(count);
+        return;
+    }
+
+    function void testArray() {
+        var Array a;
+        var int x;
+        let a = Array.new(2);
+        let a[0] = 10;
+        let x = a[0];
         do Output.printInt(x);
-
         return;
     }
 }

@@ -638,6 +638,10 @@ void CompileExpressionList(FILE* outputFile, char** token)
 void CompileTerm(FILE* outputFile, char** token)
 {
     //term: integerConstant | stringConstant | keywordConstant | varName | varName '[' expression ']' | subroutineCall | '(' expression ')' | unaryOp term
+    printIndent(outputFile);
+    fprintf(outputFile, "<term>\n");
+    indentLevel++;
+
     if(strcmp(token[currentCompileTokenIndex], "-") == 0 || strcmp(token[currentCompileTokenIndex], "~") == 0)
     {
         //unaryOp
@@ -679,9 +683,9 @@ void CompileTerm(FILE* outputFile, char** token)
             printToken(outputFile, token);
             currentCompileTokenIndex++;
         }
-        else if(strcmp(token[currentCompileTokenIndex], "(") == 0) //subroutineCall: subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
+        else if(strcmp(token[currentCompileTokenIndex], "(") == 0 || strcmp(token[currentCompileTokenIndex], ".") == 0) //subroutineCall: subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
         {
-            if(strcmp(token[currentCompileTokenIndex + 1], "(") == 0)
+            if(strcmp(token[currentCompileTokenIndex], "(") == 0)
             {
                 //'('
                 printIndent(outputFile);
@@ -694,7 +698,7 @@ void CompileTerm(FILE* outputFile, char** token)
                 printToken(outputFile, token);
                 currentCompileTokenIndex++;
             }
-            else if(strcmp(token[currentCompileTokenIndex + 1], ".") == 0)
+            else if(strcmp(token[currentCompileTokenIndex], ".") == 0)
             {
                 //'.'
                 printIndent(outputFile);
@@ -717,6 +721,10 @@ void CompileTerm(FILE* outputFile, char** token)
             }
         }
     }
+
+    indentLevel--;
+    printIndent(outputFile);
+    fprintf(outputFile, "</term>\n");
     //printf("COMPILE TERM DONE\n");
 }
 
@@ -755,7 +763,44 @@ void compileDo(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //subroutineCall: subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
-
+    //subroutineName | className | varName
+    printIndent(outputFile);
+    printToken(outputFile, token);
+    currentCompileTokenIndex++;
+    if(strcmp(token[currentCompileTokenIndex], "(") == 0)
+    {
+        //'('
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //expressionList
+        CompileExpressionList(outputFile, token);
+        //')'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+    }
+    else if(strcmp(token[currentCompileTokenIndex], ".") == 0)
+    {
+        //'.'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //subroutineName
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //'('
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //expressionList
+        CompileExpressionList(outputFile, token);
+        //')'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+    }
     //';'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -801,9 +846,7 @@ void compileLet(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
-    printIndent(outputFile);
-    printToken(outputFile, token);
-    currentCompileTokenIndex++;
+    CompileExpression(outputFile, token);
     //';'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -940,26 +983,33 @@ void compileStatements(FILE* outputFile, char **token)
     indentLevel++;
 
     //statement: letStatement | ifStatement | whileStatement | doStatement | returnStatement
-    while(strcmp(token[currentCompileTokenIndex], "let") == 0)
-    {
-        compileLet(outputFile, token);
-    }
-    while(strcmp(token[currentCompileTokenIndex], "if") == 0)
-    {
-        compileIf(outputFile, token);
-    }
-    while(strcmp(token[currentCompileTokenIndex], "while") == 0)
-    {
-        compileWhile(outputFile, token);
-    }
-    while(strcmp(token[currentCompileTokenIndex], "do") == 0)
-    {
-        compileDo(outputFile, token);
-    }
-    while(strcmp(token[currentCompileTokenIndex], "return") == 0)
-    {
-        compileReturn(outputFile, token);
-    }
+    while(strcmp(token[currentCompileTokenIndex], "let") == 0 ||
+        strcmp(token[currentCompileTokenIndex], "if") == 0 ||
+        strcmp(token[currentCompileTokenIndex], "while") == 0 ||
+        strcmp(token[currentCompileTokenIndex], "do") == 0 ||
+        strcmp(token[currentCompileTokenIndex], "return") == 0)
+        {
+            if(strcmp(token[currentCompileTokenIndex], "let") == 0)
+            {
+                compileLet(outputFile, token);
+            }
+            if(strcmp(token[currentCompileTokenIndex], "if") == 0)
+            {
+                compileIf(outputFile, token);
+            }
+            if(strcmp(token[currentCompileTokenIndex], "while") == 0)
+            {
+                compileWhile(outputFile, token);
+            }
+            if(strcmp(token[currentCompileTokenIndex], "do") == 0)
+            {
+                compileDo(outputFile, token);
+            }
+            if(strcmp(token[currentCompileTokenIndex], "return") == 0)
+            {
+                compileReturn(outputFile, token);
+            }
+        }
 
     indentLevel--;
     printIndent(outputFile);
@@ -1243,6 +1293,7 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
     }
     fprintf(outputTokenizerFile, "</tokens>\n");
 
+    currentCompileTokenIndex = 0;
     CompilationEngine(outputFile, token); //Use the CompilationEngine to compile the input JackTokenizer into the output file
 
     if(token != NULL)
