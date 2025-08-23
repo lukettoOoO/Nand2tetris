@@ -17,6 +17,14 @@ char currentToken[MAX_HACK_SIZE];
 int currentTokenIndex = 0;
 int currentCompileTokenIndex = 0;
 int indentLevel = 0;
+bool inExpression = false;
+bool inParameterList = false;
+int varCount = 0;
+int staticCount = 0;
+int fieldCount = 0;
+int argCount = 0;
+int classTableIndex = 0;
+int subroutineTableIndex = 0;
 
 char *symbolList = "{}()[].,;+-*/&|<>=~";
 char *keywordList[] = {"class", "constructor", "function",
@@ -58,6 +66,15 @@ typedef enum {
     UNKNOWN
 }key_type;
 
+typedef struct {
+    char name[CHUNK];
+    char type[CHUNK];
+    char kind[CHUNK];
+    int index;
+}Symbol;
+Symbol classTable[MAX_HACK_SIZE];
+Symbol subroutineTable[MAX_HACK_SIZE];
+
 void removeCharacter(int pos)
 {
     for(int i = pos; i < inputSize; i++)
@@ -68,6 +85,78 @@ void removeCharacter(int pos)
     inputStream[inputSize] = '\0';
 }
 
+//The SymbolTable module:
+
+void SymbolTableConstructor() //Constructor
+{   //Creates a new empty symbol table
+    varCount = 0;
+    staticCount = 0;
+    fieldCount = 0;
+    argCount = 0;
+    classTableIndex = 0;
+    subroutineTableIndex = 0;
+    memset(classTable, 0, sizeof(classTable));
+    memset(subroutineTable, 0, sizeof(subroutineTable));   
+}
+
+void startSubroutine()
+{
+    varCount = 0;
+    argCount = 0;
+    subroutineTableIndex = 0;
+    memset(subroutineTable, 0, sizeof(subroutineTable));  
+}
+
+Symbol Define(char **token) //defines a new identifier of a given name, type, and kind and assigns it a running index. 
+{                        //STATIC and FIELD identifiers have a class scope, while ARG and VAR identifiers have a subroutine scope
+    Symbol newSymbol;
+    memset(&newSymbol, 0, sizeof(Symbol));
+    if(!inExpression)
+    {
+        strcpy(newSymbol.name, token[currentCompileTokenIndex]);
+        if(strcmp(token[currentCompileTokenIndex - 2], "var") == 0 ||
+            strcmp(token[currentCompileTokenIndex - 2], "static") == 0 ||
+            strcmp(token[currentCompileTokenIndex - 2], "field") == 0)
+            {
+                strcpy(newSymbol.type, token[currentCompileTokenIndex - 1]);
+                if(strcmp(token[currentCompileTokenIndex - 2], "var") == 0)
+                {
+                    strcpy(newSymbol.kind, "VAR");
+                    newSymbol.index = varCount++;
+                }
+                else if(strcmp(token[currentCompileTokenIndex - 2], "static") == 0)
+                {
+                    strcpy(newSymbol.kind, "STATIC");
+                    newSymbol.index = staticCount++;
+                }
+                else if(strcmp(token[currentCompileTokenIndex - 2], "field") == 0)
+                {
+                    strcpy(newSymbol.kind, "FIELD");
+                    newSymbol.index = fieldCount++;
+                }
+            }
+        else if((strcmp(token[currentCompileTokenIndex + 1], ",") == 0 ||
+                strcmp(token[currentCompileTokenIndex + 1], ")") == 0) && inParameterList)
+            {
+                strcpy(newSymbol.type, token[currentCompileTokenIndex - 1]);
+                strcpy(newSymbol.kind, "ARG");
+                newSymbol.index = argCount++;
+            }
+        else if(strcmp(token[currentCompileTokenIndex - 1], "class") == 0)
+            {
+                strcpy(newSymbol.type, "class");
+                strcpy(newSymbol.kind, "NONE");
+                newSymbol.index = 0;
+            }
+        else if(strcmp(token[currentCompileTokenIndex - 2], "function") == 0)
+            {
+                strcpy(newSymbol.type, token[currentCompileTokenIndex - 1]);
+                strcpy(newSymbol.kind, "NONE");
+                newSymbol.index = 0;
+            }
+    }
+    return newSymbol;
+}
 
 //The JackTokenizer module:
 //Constructor:
@@ -451,6 +540,9 @@ void printToken(FILE* outputFile, char **token)
             break;
         case IDENTIFIER: 
             fprintf(outputFile, "<identifier> %s </identifier>\n", identifier(token[currentCompileTokenIndex]));
+            //symbol table item test:
+            Symbol sym = Define(token);
+            printf("Name: %s, Type: %s, Kind: %s, Index: %d\n", sym.name, sym.type, sym.kind, sym.index);
             break;
         case INT_CONST: 
             fprintf(outputFile, "<integerConstant> %d </integerConstant>\n", intVal(token[currentCompileTokenIndex]));
@@ -618,7 +710,9 @@ void CompileExpressionList(FILE* outputFile, char** token)
     if(strcmp(token[currentCompileTokenIndex], ")") != 0)
     {
         //expression
+        inExpression = true;
         CompileExpression(outputFile, token);
+        inExpression = false;
         while(strcmp(token[currentCompileTokenIndex], ",") == 0)
         {
             //','
@@ -626,7 +720,9 @@ void CompileExpressionList(FILE* outputFile, char** token)
             printToken(outputFile, token);
             currentCompileTokenIndex++;
             //expression
+            inExpression = true;
             CompileExpression(outputFile, token);
+            inExpression = false;
         }
     }
 
@@ -658,7 +754,9 @@ void CompileTerm(FILE* outputFile, char** token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //expression
+        inExpression = true;
         CompileExpression(outputFile, token);
+        inExpression = false;
         //')'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -677,7 +775,9 @@ void CompileTerm(FILE* outputFile, char** token)
             printToken(outputFile, token);
             currentCompileTokenIndex++;
             //expression
+            inExpression = true;
             CompileExpression(outputFile, token);
+            inExpression = false;
             //']'
             printIndent(outputFile);
             printToken(outputFile, token);
@@ -835,7 +935,9 @@ void compileLet(FILE* outputFile, char** token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //expression
+        inExpression = true;
         CompileExpression(outputFile, token);
+        inExpression = false;
         //']'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -846,7 +948,9 @@ void compileLet(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
+    inExpression = true;
     CompileExpression(outputFile, token);
+    inExpression = false;
     //';'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -873,7 +977,9 @@ void compileWhile(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
+    inExpression = true;
     CompileExpression(outputFile, token);
+    inExpression = false;
     //')'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -908,7 +1014,9 @@ void compileReturn(FILE* outputFile, char** token)
     //expression?
     if(strcmp(token[currentCompileTokenIndex], ";") != 0)
     {
+        inExpression = true;
         CompileExpression(outputFile, token);
+        inExpression = false;
     }
     //';'
     printIndent(outputFile);
@@ -936,7 +1044,9 @@ void compileIf(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
+    inExpression = true;
     CompileExpression(outputFile, token);
+    inExpression = false;
     //')'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1018,6 +1128,8 @@ void compileStatements(FILE* outputFile, char **token)
 
 void CompileSubroutine(FILE* outputFile, char **token)
 {
+    startSubroutine();
+
     //subroutineDec: ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
     printIndent(outputFile);
     fprintf(outputFile, "<subroutineDec>\n");
@@ -1044,7 +1156,11 @@ void CompileSubroutine(FILE* outputFile, char **token)
     fprintf(outputFile, "<parameterList>\n");
     indentLevel++;
     if(strcmp(token[currentCompileTokenIndex], ")") != 0)
+    {
+        inParameterList = true;
         compileParameterList(outputFile, token);
+        inParameterList = false;
+    }
     indentLevel--;
     printIndent(outputFile);
     fprintf(outputFile, "</parameterList>\n");
@@ -1082,6 +1198,8 @@ void CompileSubroutine(FILE* outputFile, char **token)
 
 void CompileClass(FILE* outputFile, char **token)
 {
+    SymbolTableConstructor();
+
     //class: 'class' className '{' classVarDec* subroutineDec* '}'
     indentLevel++;
     fprintf(outputFile, "<class>\n");
@@ -1316,8 +1434,7 @@ void JackAnalyzer(char *inputName)
     if(inputType(inputName))
     {
         printf("argument is: directory\n");
-        char pathName[4097];
-        strcat(pathName, "./");
+        char pathName[4097] = "./";
         strcat(pathName, inputName);
         DIR* dir = opendir(pathName);
         if(dir == NULL)
