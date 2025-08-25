@@ -1,0 +1,52 @@
+~~~ Luca's Jack Analyzer ~~~
+argument is: directory
+.jack file found: Square.jack
+tokenized: Square.jack
+created output file: Square.xml
+created output tokenizer file: SquareT.xml
+token size: 559
+<<<NEW CLASS>>>
+(DECLARATION) Name: x, Type: int, Kind: 1, Index: 0
+(DECLARATION) Name: y, Type: int, Kind: 1, Index: 1
+(DECLARATION) Name: size, Type: int, Kind: 1, Index: 2
+<<<NEW SUBROUTINE>>>
+(DECLARATION) Name: Ax, Type: int, Kind: 2, Index: 0
+(DECLARATION) Name: Ay, Type: int, Kind: 2, Index: 1
+(DECLARATION) Name: Asize, Type: int, Kind: 2, Index: 2
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+.jack file found: SquareGame.jack
+tokenized: SquareGame.jack
+created output file: SquareGame.xml
+created output tokenizer file: SquareGameT.xml
+token size: 313
+<<<NEW CLASS>>>
+(DECLARATION) Name: square, Type: Square, Kind: 1, Index: 0
+(DECLARATION) Name: direction, Type: int, Kind: 1, Index: 1
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+<<<NEW SUBROUTINE>>>
+(DECLARATION) Name: key, Type: char, Kind: 3, Index: 0
+(DECLARATION) Name: exit, Type: boolean, Kind: 3, Index: 1
+.jack file found: Main.jack
+tokenized: Main.jack
+created output file: Main.xml
+created output tokenizer file: MainT.xml
+token size: 124
+<<<NEW CLASS>>>
+(DECLARATION) Name: test, Type: boolean, Kind: 0, Index: 0
+<<<NEW SUBROUTINE>>>
+(DECLARATION) Name: game, Type: SquareGame, Kind: 3, Index: 0
+<<<NEW SUBROUTINE>>>
+(DECLARATION) Name: i, Type: int, Kind: 3, Index: 0
+(DECLARATION) Name: j, Type: int, Kind: 3, Index: 1
+(DECLARATION) Name: s, Type: String, Kind: 3, Index: 2
+(DECLARATION) Name: a, Type: Array, Kind: 3, Index: 3

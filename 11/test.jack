@@ -1,0 +1,28 @@
+class Test {
+    static int new_counter, counter;
+    field int x, y;
+
+    constructor Test new(int a, int b) {
+        let x = a;
+        let y = b;
+        let counter = counter + 1;
+        return this;
+    }
+
+    method int add(int z) {
+        var int result;
+        let result = x + y + z;
+        return result;
+    }
+
+    function void main() {
+        var Test t;
+        var int total;
+
+        let t = Test.new(3, 4);
+        let total = t.add(5);
+        do Output.printInt(total);
+        do Output.println();
+        return;
+    }
+}

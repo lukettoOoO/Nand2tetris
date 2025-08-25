@@ -17,7 +17,8 @@ char currentToken[MAX_HACK_SIZE];
 int currentTokenIndex = 0;
 int currentCompileTokenIndex = 0;
 int indentLevel = 0;
-
+bool inExpression = false;
+bool inParameterList = false;
 int varCount = 0;
 int staticCount = 0;
 int fieldCount = 0;
@@ -65,18 +66,10 @@ typedef enum {
     UNKNOWN
 }key_type;
 
-typedef enum {
-    STATIC_SYMBOL,
-    FIELD_SYMBOL,
-    ARG_SYMBOL,
-    VAR_SYMBOL,
-    NONE_SYMBOL
-}identifier_kind;
-
 typedef struct {
-    char name[CHUNK];
+    char name[MAX_HACK_SIZE];
     char type[CHUNK];
-    identifier_kind kind;
+    char kind[CHUNK];
     int index;
 }Symbol;
 Symbol classTable[MAX_HACK_SIZE];
@@ -92,14 +85,6 @@ void removeCharacter(int pos)
     inputStream[inputSize] = '\0';
 }
 
-char* ToUpper(char* str)
-{
-    int len = strlen(str);
-    for(int i = 0; i < len; i++)
-        str[i] = toupper(str[i]);
-    return str;
-}
-
 //The SymbolTable module:
 
 void SymbolTableConstructor() //Constructor
@@ -111,8 +96,7 @@ void SymbolTableConstructor() //Constructor
     classTableIndex = 0;
     subroutineTableIndex = 0;
     memset(classTable, 0, sizeof(classTable));
-    memset(subroutineTable, 0, sizeof(subroutineTable));
-    printf("<<<NEW CLASS>>>\n");   
+    memset(subroutineTable, 0, sizeof(subroutineTable));   
 }
 
 void startSubroutine()
@@ -120,113 +104,58 @@ void startSubroutine()
     varCount = 0;
     argCount = 0;
     subroutineTableIndex = 0;
-    memset(subroutineTable, 0, sizeof(subroutineTable));
-    printf("<<<NEW SUBROUTINE>>>\n");
+    memset(subroutineTable, 0, sizeof(subroutineTable));  
 }
 
-int VarCount(identifier_kind kind);
-
-Symbol Define(char *name, char *type, identifier_kind kind) //defines a new identifier of a given name, type, and kind and assigns it a running index. 
-{                                                           //STATIC and FIELD identifiers have a class scope, while ARG and VAR identifiers have a subroutine scope
+Symbol Define(char **token) //defines a new identifier of a given name, type, and kind and assigns it a running index. 
+{                        //STATIC and FIELD identifiers have a class scope, while ARG and VAR identifiers have a subroutine scope
     Symbol newSymbol;
     memset(&newSymbol, 0, sizeof(Symbol));
-    strcpy(newSymbol.name, name);
-    strcpy(newSymbol.type, type);
-    newSymbol.kind = kind;
-    newSymbol.index = VarCount(kind);
-
-    if (kind == STATIC_SYMBOL || kind == FIELD_SYMBOL) {
-        classTable[classTableIndex++] = newSymbol;
-    } else if (kind == ARG_SYMBOL || kind == VAR_SYMBOL) {
-        subroutineTable[subroutineTableIndex++] = newSymbol;
+    if(!inExpression)
+    {
+        strcpy(newSymbol.name, token[currentCompileTokenIndex]);
+        if(strcmp(token[currentCompileTokenIndex - 2], "var") == 0 ||
+            strcmp(token[currentCompileTokenIndex - 2], "static") == 0 ||
+            strcmp(token[currentCompileTokenIndex - 2], "field") == 0)
+            {
+                strcpy(newSymbol.type, token[currentCompileTokenIndex - 1]);
+                if(strcmp(token[currentCompileTokenIndex - 2], "var") == 0)
+                {
+                    strcpy(newSymbol.kind, "VAR");
+                    newSymbol.index = varCount++;
+                }
+                else if(strcmp(token[currentCompileTokenIndex - 2], "static") == 0)
+                {
+                    strcpy(newSymbol.kind, "STATIC");
+                    newSymbol.index = staticCount++;
+                }
+                else if(strcmp(token[currentCompileTokenIndex - 2], "field") == 0)
+                {
+                    strcpy(newSymbol.kind, "FIELD");
+                    newSymbol.index = fieldCount++;
+                }
+            }
+        else if((strcmp(token[currentCompileTokenIndex + 1], ",") == 0 ||
+                strcmp(token[currentCompileTokenIndex + 1], ")") == 0) && inParameterList)
+            {
+                strcpy(newSymbol.type, token[currentCompileTokenIndex - 1]);
+                strcpy(newSymbol.kind, "ARG");
+                newSymbol.index = argCount++;
+            }
+        else if(strcmp(token[currentCompileTokenIndex - 1], "class") == 0)
+            {
+                strcpy(newSymbol.type, "class");
+                strcpy(newSymbol.kind, "NONE");
+                newSymbol.index = 0;
+            }
+        else if(strcmp(token[currentCompileTokenIndex - 2], "function") == 0)
+            {
+                strcpy(newSymbol.type, token[currentCompileTokenIndex - 1]);
+                strcpy(newSymbol.kind, "NONE");
+                newSymbol.index = 0;
+            }
     }
-
-    printf("(DECLARATION) Name: %s, Type: %s, Kind: %d, Index: %d\n",
-       newSymbol.name, newSymbol.type, newSymbol.kind, newSymbol.index);
     return newSymbol;
-}
-
-int VarCount(identifier_kind kind)
-{
-    switch (kind)
-    {
-    case STATIC_SYMBOL:
-        return staticCount++;
-        break;
-    case FIELD_SYMBOL:
-        return fieldCount++;
-        break;
-    case ARG_SYMBOL:
-        return argCount++;
-        break;
-    case VAR_SYMBOL:
-        return varCount++;
-        break;
-    default:
-        return 0;
-        break;
-    }
-
-}
-
-identifier_kind KindOf(char* name)
-{
-    for(int i = 0; i < subroutineTableIndex; i++)
-    {
-        if(strcmp(subroutineTable[i].name, name) == 0)
-            return subroutineTable[i].kind;
-    }
-    for(int i = 0; i < classTableIndex; i++)
-    {
-        if(strcmp(classTable[i].name, name) == 0)
-            return classTable[i].kind;
-    }   
-    return NONE_SYMBOL;
-}
-
-char* TypeOf(char* name)
-{
-    for(int i = 0; i < subroutineTableIndex; i++)
-    {
-        if(strcmp(subroutineTable[i].name, name) == 0)
-            return subroutineTable[i].type;
-    }
-    for(int i = 0; i < classTableIndex; i++)
-    {
-        if(strcmp(classTable[i].name, name) == 0)
-            return classTable[i].type;
-    }   
-    return NULL;
-}
-
-int IndexOf(char* name)
-{
-    for(int i = 0; i < subroutineTableIndex; i++)
-    {
-        if(strcmp(subroutineTable[i].name, name) == 0)
-            return subroutineTable[i].index;
-    }
-    for(int i = 0; i < classTableIndex; i++)
-    {
-        if(strcmp(classTable[i].name, name) == 0)
-            return classTable[i].index;
-    }   
-    return -1;
-}
-
-Symbol* lookup(char *name)
-{
-    for(int i = 0; i < subroutineTableIndex; i++)
-    {
-        if(strcmp(subroutineTable[i].name, name) == 0)
-            return &subroutineTable[i];
-    }
-    for(int i = 0; i < classTableIndex; i++)
-    {
-        if(strcmp(classTable[i].name, name) == 0)
-            return &classTable[i];
-    }
-    return NULL;
 }
 
 //The JackTokenizer module:
@@ -611,6 +540,9 @@ void printToken(FILE* outputFile, char **token)
             break;
         case IDENTIFIER: 
             fprintf(outputFile, "<identifier> %s </identifier>\n", identifier(token[currentCompileTokenIndex]));
+            //symbol table item test:
+            Symbol sym = Define(token);
+            printf("Name: %s, Type: %s, Kind: %s, Index: %d\n", sym.name, sym.type, sym.kind, sym.index);
             break;
         case INT_CONST: 
             fprintf(outputFile, "<integerConstant> %d </integerConstant>\n", intVal(token[currentCompileTokenIndex]));
@@ -676,15 +608,6 @@ void CompileClassVarDec(FILE* outputFile, char **token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //varName
-    //SYMBOL TABLE
-    char* kind = ToUpper(token[currentCompileTokenIndex - 2]);
-    char* type = token[currentCompileTokenIndex - 1];
-    char* name = token[currentCompileTokenIndex];
-    if(strcmp(kind, "STATIC") == 0)
-        Define(name, type, STATIC_SYMBOL);
-    else if(strcmp(kind, "FIELD") == 0)
-        Define(name, type, FIELD_SYMBOL);
-                    //printf(">>>>>>>>>>>>>>>>>>>>>>> KIND: %s, TYPE: %s\n", kind, type);
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
@@ -694,11 +617,6 @@ void CompileClassVarDec(FILE* outputFile, char **token)
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
-        //SYMBOL TABLE
-        if(strcmp(kind, "STATIC") == 0)
-            Define(token[currentCompileTokenIndex], type, STATIC_SYMBOL);
-        else if(strcmp(kind, "FIELD") == 0)
-            Define(token[currentCompileTokenIndex], type, FIELD_SYMBOL);
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
@@ -721,8 +639,6 @@ void compileParameterList(FILE* outputFile, char **token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //varName
-    //SYMBOL TABLE
-    Define(token[currentCompileTokenIndex], token[currentCompileTokenIndex - 1], ARG_SYMBOL);
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
@@ -737,8 +653,6 @@ void compileParameterList(FILE* outputFile, char **token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //varName
-        //SYMBOL TABLE
-        Define(token[currentCompileTokenIndex], token[currentCompileTokenIndex - 1], ARG_SYMBOL);
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
@@ -761,10 +675,6 @@ void compileVarDec(FILE* outputFile, char **token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //varName
-    //SYMBOL TABLE
-    char* type = token[currentCompileTokenIndex - 1];
-    char* name = token[currentCompileTokenIndex];
-    Define(name, type, VAR_SYMBOL);
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
@@ -774,8 +684,6 @@ void compileVarDec(FILE* outputFile, char **token)
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
-        //SYMBOL TABLE
-        Define(token[currentCompileTokenIndex], type, VAR_SYMBOL);
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
@@ -802,7 +710,9 @@ void CompileExpressionList(FILE* outputFile, char** token)
     if(strcmp(token[currentCompileTokenIndex], ")") != 0)
     {
         //expression
+        inExpression = true;
         CompileExpression(outputFile, token);
+        inExpression = false;
         while(strcmp(token[currentCompileTokenIndex], ",") == 0)
         {
             //','
@@ -810,7 +720,9 @@ void CompileExpressionList(FILE* outputFile, char** token)
             printToken(outputFile, token);
             currentCompileTokenIndex++;
             //expression
+            inExpression = true;
             CompileExpression(outputFile, token);
+            inExpression = false;
         }
     }
 
@@ -842,7 +754,9 @@ void CompileTerm(FILE* outputFile, char** token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //expression
+        inExpression = true;
         CompileExpression(outputFile, token);
+        inExpression = false;
         //')'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -852,16 +766,6 @@ void CompileTerm(FILE* outputFile, char** token)
     {
         //integerConstant | stringConstant | keywordConstant | varName | subroutineName | className
         printIndent(outputFile);
-        /*if (tokenType(token[currentCompileTokenIndex]) == IDENTIFIER) {
-            Symbol* sym = lookup(token[currentCompileTokenIndex]);
-            if(sym) {
-                printf("(IN EXPRESSION) Name: %s, Type: %s, Kind: %d, Index: %d\n",
-                    sym->name, sym->type, sym->kind, sym->index);
-            } else {
-                printf("(IN EXPRESSION) Name: %s (not found)\n",
-                    token[currentCompileTokenIndex]);
-            }
-        }*/
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         if(strcmp(token[currentCompileTokenIndex], "[") == 0) //varName '[' expression ']'
@@ -871,7 +775,9 @@ void CompileTerm(FILE* outputFile, char** token)
             printToken(outputFile, token);
             currentCompileTokenIndex++;
             //expression
+            inExpression = true;
             CompileExpression(outputFile, token);
+            inExpression = false;
             //']'
             printIndent(outputFile);
             printToken(outputFile, token);
@@ -1029,7 +935,9 @@ void compileLet(FILE* outputFile, char** token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //expression
+        inExpression = true;
         CompileExpression(outputFile, token);
+        inExpression = false;
         //']'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1040,7 +948,9 @@ void compileLet(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
+    inExpression = true;
     CompileExpression(outputFile, token);
+    inExpression = false;
     //';'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1067,7 +977,9 @@ void compileWhile(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
+    inExpression = true;
     CompileExpression(outputFile, token);
+    inExpression = false;
     //')'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1102,7 +1014,9 @@ void compileReturn(FILE* outputFile, char** token)
     //expression?
     if(strcmp(token[currentCompileTokenIndex], ";") != 0)
     {
+        inExpression = true;
         CompileExpression(outputFile, token);
+        inExpression = false;
     }
     //';'
     printIndent(outputFile);
@@ -1130,7 +1044,9 @@ void compileIf(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
+    inExpression = true;
     CompileExpression(outputFile, token);
+    inExpression = false;
     //')'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1241,7 +1157,9 @@ void CompileSubroutine(FILE* outputFile, char **token)
     indentLevel++;
     if(strcmp(token[currentCompileTokenIndex], ")") != 0)
     {
+        inParameterList = true;
         compileParameterList(outputFile, token);
+        inParameterList = false;
     }
     indentLevel--;
     printIndent(outputFile);
@@ -1516,7 +1434,8 @@ void JackAnalyzer(char *inputName)
     if(inputType(inputName))
     {
         printf("argument is: directory\n");
-        char pathName[4097] = "./";
+        char pathName[4097];
+        strcat(pathName, "./");
         strcat(pathName, inputName);
         DIR* dir = opendir(pathName);
         if(dir == NULL)
