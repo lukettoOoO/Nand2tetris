@@ -73,6 +73,29 @@ typedef enum {
     NONE_SYMBOL
 }identifier_kind;
 
+typedef enum {
+    CONST_SEGMENT,
+    ARG_SEGMENT,
+    LOCAL_SEGMENT,
+    STATIC_SEGMENT,
+    THIS_SEGMENT,
+    THAT_SEGMENT,
+    POINTER_SEGMENT,
+    TEMP_SEGMENT
+}vm_segment;
+
+typedef enum {
+    ADD_COMMAND,
+    SUB_COMMAND,
+    NEG_COMMAND,
+    EQ_COMMAND,
+    GT_COMMAND,
+    LT_COMMAND,
+    AND_COMMAND,
+    OR_COMMAND,
+    NOT_COMMAND
+}vm_command;
+
 typedef struct {
     char name[CHUNK];
     char type[CHUNK];
@@ -100,6 +123,7 @@ char* ToUpper(char* str)
     return str;
 }
 
+//JackCompiler:
 //The SymbolTable module:
 
 void SymbolTableConstructor() //Constructor
@@ -112,7 +136,7 @@ void SymbolTableConstructor() //Constructor
     subroutineTableIndex = 0;
     memset(classTable, 0, sizeof(classTable));
     memset(subroutineTable, 0, sizeof(subroutineTable));
-    printf("<<<NEW CLASS>>>\n");   
+    //printf("<<<NEW CLASS>>>\n");   
 }
 
 void startSubroutine()
@@ -121,7 +145,7 @@ void startSubroutine()
     argCount = 0;
     subroutineTableIndex = 0;
     memset(subroutineTable, 0, sizeof(subroutineTable));
-    printf("<<<NEW SUBROUTINE>>>\n");
+    //printf("<<<NEW SUBROUTINE>>>\n");
 }
 
 int VarCount(identifier_kind kind);
@@ -141,8 +165,8 @@ Symbol Define(char *name, char *type, identifier_kind kind) //defines a new iden
         subroutineTable[subroutineTableIndex++] = newSymbol;
     }
 
-    printf("(DECLARATION) Name: %s, Type: %s, Kind: %d, Index: %d\n",
-       newSymbol.name, newSymbol.type, newSymbol.kind, newSymbol.index);
+    /*printf("(DECLARATION) Name: %s, Type: %s, Kind: %d, Index: %d\n",
+       newSymbol.name, newSymbol.type, newSymbol.kind, newSymbol.index);*/
     return newSymbol;
 }
 
@@ -227,6 +251,144 @@ Symbol* lookup(char *name)
             return &classTable[i];
     }
     return NULL;
+}
+
+//VMWriter module:
+
+//Constructer done in analyzerLogic function
+
+void writePush(FILE* outputVMFile, vm_segment Segment, int Index)
+{
+    switch(Segment)
+    {
+        case CONST_SEGMENT:
+            fprintf(outputVMFile, "push constant %d\n", Index);
+            break;
+        case ARG_SEGMENT:
+            fprintf(outputVMFile, "push argument %d\n", Index);
+            break;
+        case LOCAL_SEGMENT:
+            fprintf(outputVMFile, "push local %d\n", Index);
+            break;
+        case STATIC_SEGMENT:
+            fprintf(outputVMFile, "push static %d\n", Index);
+            break;
+        case THIS_SEGMENT:
+            fprintf(outputVMFile, "push this %d\n", Index);
+            break;
+        case THAT_SEGMENT:
+            fprintf(outputVMFile, "push that %d\n", Index);
+            break;
+        case POINTER_SEGMENT:
+            fprintf(outputVMFile, "push pointer %d\n", Index);
+            break;
+        case TEMP_SEGMENT:
+            fprintf(outputVMFile, "push temp %d\n", Index);
+            break;
+        default:
+            fprintf(stderr, "(writePush): invalid segment\n");
+            break;
+    }
+}
+
+void writePop(FILE* outputVMFile, vm_segment Segment, int Index)
+{
+    switch(Segment)
+    {
+        case CONST_SEGMENT:
+            fprintf(stderr, "(writePop): cannot pop into constant segment\n");
+            break;
+        case ARG_SEGMENT:
+            fprintf(outputVMFile, "pop argument %d\n", Index);
+            break;
+        case LOCAL_SEGMENT:
+            fprintf(outputVMFile, "pop local %d\n", Index);
+            break;
+        case STATIC_SEGMENT:
+            fprintf(outputVMFile, "pop static %d\n", Index);
+            break;
+        case THIS_SEGMENT:
+            fprintf(outputVMFile, "pop this %d\n", Index);
+            break;
+        case THAT_SEGMENT:
+            fprintf(outputVMFile, "pop that %d\n", Index);
+            break;
+        case POINTER_SEGMENT:
+            fprintf(outputVMFile, "pop pointer %d\n", Index);
+            break;
+        case TEMP_SEGMENT:
+            fprintf(outputVMFile, "pop temp %d\n", Index);
+            break;
+        default:
+            break;
+    }
+}
+
+void WriteArithmetic(FILE* outputVMFile, vm_command command)
+{
+    switch(command)
+    {
+        case ADD_COMMAND:
+            fprintf(outputVMFile, "add\n");
+            break;
+        case SUB_COMMAND:
+            fprintf(outputVMFile, "sub\n");
+            break;
+        case NEG_COMMAND:
+            fprintf(outputVMFile, "neg\n");
+            break;
+        case EQ_COMMAND:
+            fprintf(outputVMFile, "eq\n");
+            break;
+        case GT_COMMAND:
+            fprintf(outputVMFile, "gt\n");
+            break;
+        case LT_COMMAND:
+            fprintf(outputVMFile, "lt\n");
+            break;
+        case AND_COMMAND:
+            fprintf(outputVMFile, "and\n");
+            break;
+        case OR_COMMAND:
+            fprintf(outputVMFile, "or\n");
+            break;
+        case NOT_COMMAND:
+            fprintf(outputVMFile, "not\n");
+            break;
+        default:
+            fprintf(stderr, "(writeArithmetic): invalid command\n");
+            break;
+    }
+}
+
+void WriteLabel(FILE* outputVMFile, char* label)
+{
+    fprintf(outputVMFile, "label %s\n", label);
+}
+
+void WriteGoto(FILE* outputVMFile, char* label)
+{
+    fprintf(outputVMFile, "goto %s\n", label);
+}
+
+void WriteIf(FILE* outputVMFile, char* label)
+{
+    fprintf(outputVMFile, "if-goto %s\n", label);
+}
+
+void writeCall(FILE* outputVMFile, char* name, int nArgs)
+{
+    fprintf(outputVMFile, "call %s %d\n", name, nArgs);
+}
+
+void writeFunction(FILE* outputVMFile, char* name, int nLocals)
+{
+    fprintf(outputVMFile, "function %s %d\n", name, nLocals);
+}
+
+void writeReturn(FILE* outputVMFile)
+{
+    fprintf(outputVMFile, "return\n");
 }
 
 //The JackTokenizer module:
@@ -1347,10 +1509,12 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
 
     FILE* outputFile = NULL; //the output .xml file
     FILE* outputTokenizerFile = NULL; //the output tokenizer .xml file (For each source file Xxx.jack, have your tokenizer give the output file the name XxxT.xml)
+    FILE* outputVMFile = NULL; //the output .vm file
     if(inputType(inputName) == 0) //Create an output file called Xxx.xml and prepare it for writing in the current directory
     {
         char outputName[256] = "";
         char outputTokenizerName[256] = "";
+        char outputVMName[256] = "";
         for(int i = 0; i < strlen(inputName); i++)
         {
             outputName[i] = inputName[i];
@@ -1359,6 +1523,7 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
         }
         outputName[strlen(outputName) - 1] = '\0'; 
 
+        strcpy(outputVMName, outputName);
         strcpy(outputTokenizerName, outputName);
         strcat(outputTokenizerName, "T.xml");
 
@@ -1379,11 +1544,21 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
         }
         printf("created output tokenizer file: %s\n", outputTokenizerName);
 
+        strcat(outputVMName, ".vm");
+        outputVMFile = fopen(outputVMName, "w");
+        if(outputVMFile == NULL)
+        {
+            fprintf(stderr, "(analyzerLogic): error opening output VM file\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("created output VM file: %s\n", outputVMName);
+
     }
     else if(inputType(inputName) == 1) //Create an output file called Xxx.xml and prepare it for writing in the directory given by input
     {
         char outputName[256] = "";
         char outputTokenizerName[256] = "";
+        char outputVMName[256] = "";
         for(int i = 0; i < strlen(fileName); i++)
         {
             outputName[i] = fileName[i];
@@ -1394,6 +1569,9 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
 
         strcpy(outputTokenizerName, outputName);
         strcat(outputTokenizerName, "T.xml");
+
+        strcpy(outputVMName, outputName);
+        strcat(outputVMName, ".vm");
 
         strcat(outputName, ".xml");
 
@@ -1408,6 +1586,12 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
         strcat(outputPathTokenizer, inputName);
         strcat(outputPathTokenizer, "/");
         strcat(outputPathTokenizer, outputTokenizerName);
+
+        char outputPathVM[4097] = "";
+        strcat(outputPathVM, "./");
+        strcat(outputPathVM, inputName);
+        strcat(outputPathVM, "/");
+        strcat(outputPathVM, outputVMName);
 
         outputFile = fopen(outputPath, "w");
         if(outputFile == NULL)
@@ -1425,6 +1609,14 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
             exit(EXIT_FAILURE);
         }
         printf("created output tokenizer file: %s\n", outputTokenizerName);
+
+        outputVMFile = fopen(outputPathVM, "w");
+        if(outputVMFile == NULL)
+        {
+            fprintf(stderr, "(analyzerLogic): error opening output VM file\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("created output VM file: %s\n", outputVMName);
     }
     printf("token size: %d\n", tokenSize);
 
