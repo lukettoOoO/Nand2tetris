@@ -25,6 +25,8 @@ int argCount = 0;
 int classTableIndex = 0;
 int subroutineTableIndex = 0;
 
+char currentClass[256];
+
 char *symbolList = "{}()[].,;+-*/&|<>=~";
 char *keywordList[] = {"class", "constructor", "function",
     "method", "field", "static", "var",
@@ -253,11 +255,28 @@ Symbol* lookup(char *name)
     return NULL;
 }
 
+vm_segment kindToSegment(identifier_kind kind)
+{
+    switch (kind)
+    {
+    case STATIC_SYMBOL:
+        return STATIC_SEGMENT;
+    case FIELD_SYMBOL:
+        return THIS_SEGMENT;
+    case ARG_SYMBOL:
+        return LOCAL_SEGMENT;
+    case VAR_SYMBOL:
+        return LOCAL_SEGMENT;
+    default:
+        return CONST_SEGMENT;
+    }
+}
+
 //VMWriter module:
 
 //Constructer done in analyzerLogic function
 
-void writePush(FILE* outputVMFile, vm_segment Segment, int Index)
+void WritePush(FILE* outputVMFile, vm_segment Segment, int Index)
 {
     switch(Segment)
     {
@@ -291,7 +310,7 @@ void writePush(FILE* outputVMFile, vm_segment Segment, int Index)
     }
 }
 
-void writePop(FILE* outputVMFile, vm_segment Segment, int Index)
+void WritePop(FILE* outputVMFile, vm_segment Segment, int Index)
 {
     switch(Segment)
     {
@@ -335,7 +354,7 @@ void WriteArithmetic(FILE* outputVMFile, vm_command command)
             fprintf(outputVMFile, "sub\n");
             break;
         case NEG_COMMAND:
-            fprintf(outputVMFile, "neg\n");
+            fprintf(outputVMFile, "neg\n");     //unary
             break;
         case EQ_COMMAND:
             fprintf(outputVMFile, "eq\n");
@@ -353,7 +372,7 @@ void WriteArithmetic(FILE* outputVMFile, vm_command command)
             fprintf(outputVMFile, "or\n");
             break;
         case NOT_COMMAND:
-            fprintf(outputVMFile, "not\n");
+            fprintf(outputVMFile, "not\n");     //unary
             break;
         default:
             fprintf(stderr, "(writeArithmetic): invalid command\n");
@@ -376,19 +395,71 @@ void WriteIf(FILE* outputVMFile, char* label)
     fprintf(outputVMFile, "if-goto %s\n", label);
 }
 
-void writeCall(FILE* outputVMFile, char* name, int nArgs)
+void WriteCall(FILE* outputVMFile, char* name, int nArgs)
 {
     fprintf(outputVMFile, "call %s %d\n", name, nArgs);
 }
 
-void writeFunction(FILE* outputVMFile, char* name, int nLocals)
+void WriteFunction(FILE* outputVMFile, char* name, int nLocals)
 {
     fprintf(outputVMFile, "function %s %d\n", name, nLocals);
 }
 
-void writeReturn(FILE* outputVMFile)
+void WriteReturn(FILE* outputVMFile)
 {
     fprintf(outputVMFile, "return\n");
+}
+
+void handleArithmeticBinary(FILE* outputVMFile, char* currentToken) //only for binary ops inside expressions
+{
+    if(strcmp(currentToken, "+") == 0)
+    {
+        WriteArithmetic(outputVMFile, ADD_COMMAND);
+    }
+    else if(strcmp(currentToken, "-") == 0)
+    {
+        WriteArithmetic(outputVMFile, SUB_COMMAND);
+    }
+    else if(strcmp(currentToken, "=") == 0)
+    {
+        WriteArithmetic(outputVMFile, EQ_COMMAND);
+    }
+    else if(strcmp(currentToken, ">") == 0)
+    {
+        WriteArithmetic(outputVMFile, GT_COMMAND);
+    }
+    else if(strcmp(currentToken, "<") == 0)
+    {
+        WriteArithmetic(outputVMFile, LT_COMMAND);
+    }
+    else if(strcmp(currentToken, "&") == 0)
+    {
+        WriteArithmetic(outputVMFile, AND_COMMAND);
+    }
+    else if(strcmp(currentToken, "|") == 0)
+    {
+        WriteArithmetic(outputVMFile, OR_COMMAND);
+    }
+    else if(strcmp(currentToken, "*") == 0)
+    {
+        WriteCall(outputVMFile, "Math.multiply", 2);
+    }
+    else if(strcmp(currentToken, "/") == 0)
+    {
+        WriteCall(outputVMFile, "Math.divide", 2);
+    }
+    else
+    {
+        fprintf(stderr, "(handleArithmeticBinary): unknown arithmetic token: %s\n", currentToken);
+    }
+}
+
+void handleArithmeticUnary(FILE* outputVMFile, char* currentToken)
+{
+    if(strcmp(currentToken, "-") == 0)
+        WriteArithmetic(outputVMFile, NEG_COMMAND);
+    else
+        WriteArithmetic(outputVMFile, NOT_COMMAND);
 }
 
 //The JackTokenizer module:
@@ -822,7 +893,7 @@ bool isOp(char* token)
     return false;
 }
 
-void CompileClassVarDec(FILE* outputFile, char **token)
+void CompileClassVarDec(FILE* outputFile, FILE* outputVMFile, char **token)
 {
     //classVarDec: ('static' | 'field') type varName (',' varName)* ';'
     printIndent(outputFile);
@@ -875,7 +946,7 @@ void CompileClassVarDec(FILE* outputFile, char **token)
     fprintf(outputFile, "</classVarDec>\n");
 }
 
-void compileParameterList(FILE* outputFile, char **token)
+void compileParameterList(FILE* outputFile, FILE* outputVMFile, char **token)
 {   
     //((type varName) (',' type varName)*)?
     //type
@@ -907,7 +978,7 @@ void compileParameterList(FILE* outputFile, char **token)
     }
 }
 
-void compileVarDec(FILE* outputFile, char **token)
+void compileVarDec(FILE* outputFile, FILE* outputVMFile, char **token)
 {
     //'var' type varName (',' varName)* ';'
     printIndent(outputFile);
@@ -952,11 +1023,14 @@ void compileVarDec(FILE* outputFile, char **token)
     fprintf(outputFile, "</varDec>\n");
 }
 
-void CompileExpression(FILE* outputFile, char** token);
-
-void CompileExpressionList(FILE* outputFile, char** token)
+void CompileExpression(FILE* outputFile, FILE* outputVMFile, char** token);
+ 
+int CompileExpressionList(FILE* outputFile, FILE* outputVMFile, char** token)
 {
     //expressionList: (expression (',' expression)*)?
+    //VM
+    int nArgs = 0;
+
     printIndent(outputFile);
     fprintf(outputFile, "<expressionList>\n");
     indentLevel++;
@@ -964,38 +1038,57 @@ void CompileExpressionList(FILE* outputFile, char** token)
     if(strcmp(token[currentCompileTokenIndex], ")") != 0)
     {
         //expression
-        CompileExpression(outputFile, token);
+        CompileExpression(outputFile, outputVMFile, token);
+        //VM
+        nArgs++;
+
         while(strcmp(token[currentCompileTokenIndex], ",") == 0)
         {
+            //VM
+            nArgs++;
+
             //','
             printIndent(outputFile);
             printToken(outputFile, token);
             currentCompileTokenIndex++;
             //expression
-            CompileExpression(outputFile, token);
+            CompileExpression(outputFile, outputVMFile, token);
         }
     }
 
     indentLevel--;
     printIndent(outputFile);
     fprintf(outputFile, "</expressionList>\n");
+    //VM
+    return nArgs;
 }
 
-void CompileTerm(FILE* outputFile, char** token)
+void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
 {
     //term: integerConstant | stringConstant | keywordConstant | varName | varName '[' expression ']' | subroutineCall | '(' expression ')' | unaryOp term
     printIndent(outputFile);
     fprintf(outputFile, "<term>\n");
     indentLevel++;
+    //VM
+    char subroutineName[256];
+    strcpy(subroutineName, currentClass);
+    strcat(subroutineName, ".");
 
     if(strcmp(token[currentCompileTokenIndex], "-") == 0 || strcmp(token[currentCompileTokenIndex], "~") == 0)
     {
         //unaryOp
         printIndent(outputFile);
         printToken(outputFile, token);
+        //VM
+        char unaryOp[2];
+        strncpy(unaryOp, token[currentCompileTokenIndex], 1);
+        unaryOp[1] = '\0';
+
         currentCompileTokenIndex++;
         //term
-        CompileTerm(outputFile, token);
+        CompileTerm(outputFile, outputVMFile, token);
+        //VM
+        handleArithmeticUnary(outputVMFile, unaryOp);
     }
     else if(strcmp(token[currentCompileTokenIndex], "(") == 0)
     {
@@ -1004,7 +1097,7 @@ void CompileTerm(FILE* outputFile, char** token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //expression
-        CompileExpression(outputFile, token);
+        CompileExpression(outputFile, outputVMFile, token);
         //')'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1025,6 +1118,52 @@ void CompileTerm(FILE* outputFile, char** token)
             }
         }*/
         printToken(outputFile, token);
+        //VM
+        if(tokenType(token[currentCompileTokenIndex]) == INT_CONST)
+        {
+            WritePush(outputVMFile, CONST_SEGMENT, intVal(token[currentCompileTokenIndex]));
+        }
+        else if(tokenType(token[currentCompileTokenIndex]) == STRING_CONST)
+        {
+            char* str = stringVal(token[currentCompileTokenIndex]);
+            int len = strlen(str);
+            WritePush(outputVMFile, CONST_SEGMENT, len);
+            WriteCall(outputVMFile, "String.new", 1);
+            for(int i = 0; i < len; i++)
+            {
+                WritePush(outputVMFile, CONST_SEGMENT, str[i]);
+                WriteCall(outputVMFile, "String.appendChar", 2);
+            }
+            free(str);
+        }
+        else if(tokenType(token[currentCompileTokenIndex]) == KEYWORD)
+        {
+            if(strcmp(token[currentCompileTokenIndex], "true") == 0)
+            {
+                WritePush(outputVMFile, CONST_SEGMENT, 0);
+                WriteArithmetic(outputVMFile, NOT_COMMAND);
+            }
+            else if(strcmp(token[currentCompileTokenIndex], "false") == 0 || strcmp(token[currentCompileTokenIndex], "null") == 0)
+            {
+                WritePush(outputVMFile, CONST_SEGMENT, 0);
+            }
+            else if(strcmp(token[currentCompileTokenIndex], "this") == 0)
+            {
+                WritePush(outputVMFile, THIS_SEGMENT, 0);
+            }
+        }
+        else if(tokenType(token[currentCompileTokenIndex]) == IDENTIFIER)
+        {
+            Symbol* sym = lookup(token[currentCompileTokenIndex]);
+            if(sym != NULL)
+            {
+                WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);
+                strcat(subroutineName, sym->name);
+            }
+            else
+                fprintf(stderr, "(CompileTerm): Variable not found: %s\n", token[currentCompileTokenIndex]);
+        }
+
         currentCompileTokenIndex++;
         if(strcmp(token[currentCompileTokenIndex], "[") == 0) //varName '[' expression ']'
         {
@@ -1033,7 +1172,12 @@ void CompileTerm(FILE* outputFile, char** token)
             printToken(outputFile, token);
             currentCompileTokenIndex++;
             //expression
-            CompileExpression(outputFile, token);
+            CompileExpression(outputFile, outputVMFile, token);
+            //VM
+            WriteArithmetic(outputVMFile, ADD_COMMAND);
+            WritePop(outputVMFile, POINTER_SEGMENT, 1);
+            WritePush(outputVMFile, THAT_SEGMENT, 0);
+
             //']'
             printIndent(outputFile);
             printToken(outputFile, token);
@@ -1043,19 +1187,39 @@ void CompileTerm(FILE* outputFile, char** token)
         {
             if(strcmp(token[currentCompileTokenIndex], "(") == 0)
             {
+                //VM
+                int nArgs = 0;
+
                 //'('
                 printIndent(outputFile);
                 printToken(outputFile, token);
                 currentCompileTokenIndex++;
                 //expressionList
-                CompileExpressionList(outputFile, token);
+                nArgs = CompileExpressionList(outputFile, outputVMFile, token); //(VM)
                 //')'
                 printIndent(outputFile);
                 printToken(outputFile, token);
                 currentCompileTokenIndex++;
+                //VM
+                WritePush(outputVMFile, POINTER_SEGMENT, 0);
+                nArgs++;
+                WriteCall(outputVMFile, subroutineName, nArgs);
             }
             else if(strcmp(token[currentCompileTokenIndex], ".") == 0)
             {
+                //VM
+                char fullSubroutineName[256];
+                bool isVariable = true;
+                int nArgs = 0;
+                Symbol* sym = lookup(token[currentCompileTokenIndex - 1]);
+                if(sym != NULL)
+                    isVariable = true;
+                else
+                    isVariable = false;
+                char* tokenBeforeDot = token[currentCompileTokenIndex - 1];
+                if(isVariable)
+                    WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);
+
                 //'.'
                 printIndent(outputFile);
                 printToken(outputFile, token);
@@ -1063,13 +1227,32 @@ void CompileTerm(FILE* outputFile, char** token)
                 //subroutineName
                 printIndent(outputFile);
                 printToken(outputFile, token);
+                //VM
+                if(isVariable)
+                {
+                    strcpy(fullSubroutineName, TypeOf(sym->name));
+                    strcat(fullSubroutineName, ".");
+                    strcat(fullSubroutineName, token[currentCompileTokenIndex]);
+                }
+                else
+                {
+                    strcpy(fullSubroutineName, tokenBeforeDot);
+                    strcat(fullSubroutineName, ".");
+                    strcat(fullSubroutineName, token[currentCompileTokenIndex]);
+                }
+
                 currentCompileTokenIndex++;
                 //'('
                 printIndent(outputFile);
                 printToken(outputFile, token);
                 currentCompileTokenIndex++;
                 //expressionList
-                CompileExpressionList(outputFile, token);
+                nArgs = CompileExpressionList(outputFile, outputVMFile, token); //(VM)
+                //VM
+                if(isVariable)
+                    nArgs++;
+                WriteCall(outputVMFile, fullSubroutineName, nArgs);
+
                 //')'
                 printIndent(outputFile);
                 printToken(outputFile, token);
@@ -1084,20 +1267,24 @@ void CompileTerm(FILE* outputFile, char** token)
     //printf("COMPILE TERM DONE\n");
 }
 
-void CompileExpression(FILE* outputFile, char** token)
+void CompileExpression(FILE* outputFile, FILE* outputVMFile, char** token)
 {
     //expression: term (op term)*
+    //handles only binary ops
     printIndent(outputFile);
     fprintf(outputFile, "<expression>\n");
     indentLevel++;
 
-    CompileTerm(outputFile, token);
+    CompileTerm(outputFile, outputVMFile, token);
     while(isOp(token[currentCompileTokenIndex]))
         {
             printIndent(outputFile);
             printToken(outputFile, token);
+            //VM
+            handleArithmeticBinary(outputVMFile, token[currentCompileTokenIndex]);
+            
             currentCompileTokenIndex++;
-            CompileTerm(outputFile, token);
+            CompileTerm(outputFile, outputVMFile, token);
         }
 
     indentLevel--;
@@ -1105,9 +1292,9 @@ void CompileExpression(FILE* outputFile, char** token)
     fprintf(outputFile, "</expression>\n");
 }
 
-void compileStatements(FILE* outputFile, char **token);
+void compileStatements(FILE* outputFile, FILE* outputVMFile, char **token);
 
-void compileDo(FILE* outputFile, char** token)
+void compileDo(FILE* outputFile, FILE* outputVMFile, char** token)
 {
     //doStatement: 'do' subroutineCall ';'
     printIndent(outputFile);
@@ -1130,7 +1317,7 @@ void compileDo(FILE* outputFile, char** token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //expressionList
-        CompileExpressionList(outputFile, token);
+        CompileExpressionList(outputFile, outputVMFile, token);
         //')'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1151,7 +1338,7 @@ void compileDo(FILE* outputFile, char** token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //expressionList
-        CompileExpressionList(outputFile, token);
+        CompileExpressionList(outputFile, outputVMFile, token);
         //')'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1168,7 +1355,7 @@ void compileDo(FILE* outputFile, char** token)
     fprintf(outputFile, "</doStatement>\n");
 }
 
-void compileLet(FILE* outputFile, char** token)
+void compileLet(FILE* outputFile, FILE* outputVMFile, char** token)
 {
     //letStatement: 'let' varName ('[' expression ']')? '=' expression ';'
     printIndent(outputFile);
@@ -1191,7 +1378,7 @@ void compileLet(FILE* outputFile, char** token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //expression
-        CompileExpression(outputFile, token);
+        CompileExpression(outputFile, outputVMFile, token);
         //']'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1202,7 +1389,7 @@ void compileLet(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
-    CompileExpression(outputFile, token);
+    CompileExpression(outputFile, outputVMFile, token);
     //';'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1213,7 +1400,7 @@ void compileLet(FILE* outputFile, char** token)
     fprintf(outputFile, "</letStatement>\n");
 }
 
-void compileWhile(FILE* outputFile, char** token)
+void compileWhile(FILE* outputFile, FILE* outputVMFile, char** token)
 {
     //whileStatement: 'while' '(' expression ')' '{' statements '}'
     printIndent(outputFile);
@@ -1229,7 +1416,7 @@ void compileWhile(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
-    CompileExpression(outputFile, token);
+    CompileExpression(outputFile, outputVMFile, token);
     //')'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1239,7 +1426,7 @@ void compileWhile(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //statements
-    compileStatements(outputFile, token);
+    compileStatements(outputFile, outputVMFile, token);
     //'}'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1250,7 +1437,7 @@ void compileWhile(FILE* outputFile, char** token)
     fprintf(outputFile, "</whileStatement>\n");
 }
 
-void compileReturn(FILE* outputFile, char** token)
+void compileReturn(FILE* outputFile, FILE* outputVMFile, char** token)
 {
     //'return' expression? ';'
     printIndent(outputFile);
@@ -1264,7 +1451,7 @@ void compileReturn(FILE* outputFile, char** token)
     //expression?
     if(strcmp(token[currentCompileTokenIndex], ";") != 0)
     {
-        CompileExpression(outputFile, token);
+        CompileExpression(outputFile, outputVMFile, token);
     }
     //';'
     printIndent(outputFile);
@@ -1276,7 +1463,7 @@ void compileReturn(FILE* outputFile, char** token)
     fprintf(outputFile, "</returnStatement>\n");
 }
 
-void compileIf(FILE* outputFile, char** token)
+void compileIf(FILE* outputFile, FILE* outputVMFile, char** token)
 {
     //'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
     printIndent(outputFile);
@@ -1292,7 +1479,7 @@ void compileIf(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //expression
-    CompileExpression(outputFile, token);
+    CompileExpression(outputFile, outputVMFile, token);
     //')'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1302,7 +1489,7 @@ void compileIf(FILE* outputFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //statements
-    compileStatements(outputFile, token);
+    compileStatements(outputFile, outputVMFile, token);
     //'}'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1319,7 +1506,7 @@ void compileIf(FILE* outputFile, char** token)
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //statements
-        compileStatements(outputFile, token);
+        compileStatements(outputFile, outputVMFile, token);
         //'}'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1331,7 +1518,7 @@ void compileIf(FILE* outputFile, char** token)
     fprintf(outputFile, "</ifStatement>\n");
 }
 
-void compileStatements(FILE* outputFile, char **token)
+void compileStatements(FILE* outputFile, FILE* outputVMFile, char **token)
 {
     //statements: statement*
     printIndent(outputFile);
@@ -1347,23 +1534,23 @@ void compileStatements(FILE* outputFile, char **token)
         {
             if(strcmp(token[currentCompileTokenIndex], "let") == 0)
             {
-                compileLet(outputFile, token);
+                compileLet(outputFile, outputVMFile, token);
             }
             if(strcmp(token[currentCompileTokenIndex], "if") == 0)
             {
-                compileIf(outputFile, token);
+                compileIf(outputFile, outputVMFile, token);
             }
             if(strcmp(token[currentCompileTokenIndex], "while") == 0)
             {
-                compileWhile(outputFile, token);
+                compileWhile(outputFile, outputVMFile, token);
             }
             if(strcmp(token[currentCompileTokenIndex], "do") == 0)
             {
-                compileDo(outputFile, token);
+                compileDo(outputFile, outputVMFile, token);
             }
             if(strcmp(token[currentCompileTokenIndex], "return") == 0)
             {
-                compileReturn(outputFile, token);
+                compileReturn(outputFile, outputVMFile, token);
             }
         }
 
@@ -1372,7 +1559,7 @@ void compileStatements(FILE* outputFile, char **token)
     fprintf(outputFile, "</statements>\n");
 }
 
-void CompileSubroutine(FILE* outputFile, char **token)
+void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
 {
     startSubroutine();
 
@@ -1403,7 +1590,7 @@ void CompileSubroutine(FILE* outputFile, char **token)
     indentLevel++;
     if(strcmp(token[currentCompileTokenIndex], ")") != 0)
     {
-        compileParameterList(outputFile, token);
+        compileParameterList(outputFile, outputVMFile, token);
     }
     indentLevel--;
     printIndent(outputFile);
@@ -1424,9 +1611,9 @@ void CompileSubroutine(FILE* outputFile, char **token)
     currentCompileTokenIndex++;
     //varDec*
     while(strcmp(token[currentCompileTokenIndex], "var") == 0)
-        compileVarDec(outputFile, token);
+        compileVarDec(outputFile, outputVMFile, token);
     //statements
-    compileStatements(outputFile, token);
+    compileStatements(outputFile, outputVMFile, token);
     //'}'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1440,9 +1627,11 @@ void CompileSubroutine(FILE* outputFile, char **token)
     fprintf(outputFile, "</subroutineDec>\n");
 }
 
-void CompileClass(FILE* outputFile, char **token)
+void CompileClass(FILE* outputFile, FILE* outputVMFile, char **token)
 {
     SymbolTableConstructor();
+
+    memset(currentClass, 0, sizeof(currentClass));
 
     //class: 'class' className '{' classVarDec* subroutineDec* '}'
     indentLevel++;
@@ -1452,6 +1641,9 @@ void CompileClass(FILE* outputFile, char **token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //className
+    //VM
+    strcpy(currentClass, token[currentCompileTokenIndex]);
+
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
@@ -1461,10 +1653,10 @@ void CompileClass(FILE* outputFile, char **token)
     currentCompileTokenIndex++;
     //classVarDec*
     while(isClassVarDec(token[currentCompileTokenIndex]))
-        CompileClassVarDec(outputFile, token);
+        CompileClassVarDec(outputFile, outputVMFile, token);
     //subroutineDec*
     while(isSubroutineDec(token[currentCompileTokenIndex]))
-        CompileSubroutine(outputFile, token);
+        CompileSubroutine(outputFile, outputVMFile, token);
     //}
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1473,9 +1665,9 @@ void CompileClass(FILE* outputFile, char **token)
     fprintf(outputFile, "</class>\n");
 }
 
-void CompilationEngine(FILE* outputFile, char** token) //Constructor
+void CompilationEngine(FILE* outputFile, FILE* outputVMFile, char** token) //Constructor
 {
-    CompileClass(outputFile, token);
+    CompileClass(outputFile, outputVMFile, token);
 }
 
 //JackAnalyzer:
@@ -1686,7 +1878,7 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
     fprintf(outputTokenizerFile, "</tokens>\n");
 
     currentCompileTokenIndex = 0;
-    CompilationEngine(outputFile, token); //Use the CompilationEngine to compile the input JackTokenizer into the output file
+    CompilationEngine(outputFile, outputVMFile, token); //Use the CompilationEngine to compile the input JackTokenizer into the output file
 
     if(token != NULL)
     {
@@ -1701,6 +1893,7 @@ void analyzerLogic(char *inputName, char *fileName) //if input is file, fileName
 
     fclose(outputFile);
     fclose(outputTokenizerFile);
+    fclose(outputVMFile);
 }
 
 void JackAnalyzer(char *inputName)
