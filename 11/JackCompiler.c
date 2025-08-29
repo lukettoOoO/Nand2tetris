@@ -1278,13 +1278,16 @@ void CompileExpression(FILE* outputFile, FILE* outputVMFile, char** token)
     CompileTerm(outputFile, outputVMFile, token);
     while(isOp(token[currentCompileTokenIndex]))
         {
+            //VM
+            char op[4];
+            strcpy(op, token[currentCompileTokenIndex]);
+
             printIndent(outputFile);
             printToken(outputFile, token);
-            //VM
-            handleArithmeticBinary(outputVMFile, token[currentCompileTokenIndex]);
-            
             currentCompileTokenIndex++;
             CompileTerm(outputFile, outputVMFile, token);
+            //VM
+            handleArithmeticBinary(outputVMFile, op);
         }
 
     indentLevel--;
@@ -1933,7 +1936,7 @@ void JackAnalyzer(char *inputName)
 //main:
 int main(int argc, char** argv)
 {
-    printf("%s\n", "~~~ Luca's Jack Analyzer ~~~");
+    printf("%s\n", "~~~ Luca's Jack Compiler ~~~");
 
     if(argc <= 1)
     {

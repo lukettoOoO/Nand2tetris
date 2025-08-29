@@ -1,28 +1,35 @@
-class Test {
-    static int new_counter, counter;
+// TermTest.jack
+class TermTest {
+
     field int x, y;
-
-    constructor Test new(int a, int b) {
-        let x = a;
-        let y = b;
-        let counter = counter + 1;
-        return this;
-    }
-
-    method int add(int z) {
-        var int result;
-        let result = x + y + z;
-        return result;
-    }
+    field String msg;
 
     function void main() {
-        var Test t;
-        var int total;
+        var int a, b;
+        var String s;
+        var TermTest obj;
 
-        let t = Test.new(3, 4);
-        let total = t.add(5);
-        do Output.printInt(total);
-        do Output.println();
+        let a = 10;                    // integer constant
+        let b = a + 5;                 // binary op with variable
+        let s = "Hello";               // string constant
+        let x = 0;                      // field variable
+        let y = 1;                      // field variable
+        let msg = s;                    // field String
+
+        let a = -b;                     // unary minus
+        let b = ~a;                     // unary NOT
+
+        let obj = this;                 // variable pointing to current object
+        do Output.printInt(a);          // simple call
+        do Output.printInt(obj.add(b)); // dotted call on object
+
+        let x = y[0];                   // array access example
+        let y[0] = a + b;               // array assignment with expression
+
         return;
+    }
+
+    method int add(int n) {
+        return n + x;                   // simple arithmetic return
     }
 }

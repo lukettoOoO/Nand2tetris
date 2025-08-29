@@ -1,15 +1,7 @@
 <class>
   <keyword> class </keyword>
-  <identifier> Test </identifier>
+  <identifier> TermTest </identifier>
   <symbol> { </symbol>
-  <classVarDec>
-    <keyword> static </keyword>
-    <keyword> int </keyword>
-    <identifier> new_counter </identifier>
-    <symbol> , </symbol>
-    <identifier> counter </identifier>
-    <symbol> ; </symbol>
-  </classVarDec>
   <classVarDec>
     <keyword> field </keyword>
     <keyword> int </keyword>
@@ -18,123 +10,12 @@
     <identifier> y </identifier>
     <symbol> ; </symbol>
   </classVarDec>
-  <subroutineDec>
-    <keyword> constructor </keyword>
-    <identifier> Test </identifier>
-    <identifier> new </identifier>
-    <symbol> ( </symbol>
-    <parameterList>
-      <keyword> int </keyword>
-      <identifier> a </identifier>
-      <symbol> , </symbol>
-      <keyword> int </keyword>
-      <identifier> b </identifier>
-    </parameterList>
-    <symbol> ) </symbol>
-    <subroutineBody>
-      <symbol> { </symbol>
-      <statements>
-        <letStatement>
-          <keyword> let </keyword>
-          <identifier> x </identifier>
-          <symbol> = </symbol>
-          <expression>
-            <term>
-              <identifier> a </identifier>
-            </term>
-          </expression>
-          <symbol> ; </symbol>
-        </letStatement>
-        <letStatement>
-          <keyword> let </keyword>
-          <identifier> y </identifier>
-          <symbol> = </symbol>
-          <expression>
-            <term>
-              <identifier> b </identifier>
-            </term>
-          </expression>
-          <symbol> ; </symbol>
-        </letStatement>
-        <letStatement>
-          <keyword> let </keyword>
-          <identifier> counter </identifier>
-          <symbol> = </symbol>
-          <expression>
-            <term>
-              <identifier> counter </identifier>
-            </term>
-            <symbol> + </symbol>
-            <term>
-              <integerConstant> 1 </integerConstant>
-            </term>
-          </expression>
-          <symbol> ; </symbol>
-        </letStatement>
-        <returnStatement>
-          <keyword> return </keyword>
-          <expression>
-            <term>
-              <keyword> this </keyword>
-            </term>
-          </expression>
-          <symbol> ; </symbol>
-        </returnStatement>
-      </statements>
-      <symbol> } </symbol>
-    </subroutineBody>
-  </subroutineDec>
-  <subroutineDec>
-    <keyword> method </keyword>
-    <keyword> int </keyword>
-    <identifier> add </identifier>
-    <symbol> ( </symbol>
-    <parameterList>
-      <keyword> int </keyword>
-      <identifier> z </identifier>
-    </parameterList>
-    <symbol> ) </symbol>
-    <subroutineBody>
-      <symbol> { </symbol>
-      <varDec>
-        <keyword> var </keyword>
-        <keyword> int </keyword>
-        <identifier> result </identifier>
-        <symbol> ; </symbol>
-      </varDec>
-      <statements>
-        <letStatement>
-          <keyword> let </keyword>
-          <identifier> result </identifier>
-          <symbol> = </symbol>
-          <expression>
-            <term>
-              <identifier> x </identifier>
-            </term>
-            <symbol> + </symbol>
-            <term>
-              <identifier> y </identifier>
-            </term>
-            <symbol> + </symbol>
-            <term>
-              <identifier> z </identifier>
-            </term>
-          </expression>
-          <symbol> ; </symbol>
-        </letStatement>
-        <returnStatement>
-          <keyword> return </keyword>
-          <expression>
-            <term>
-              <identifier> result </identifier>
-            </term>
-          </expression>
-          <symbol> ; </symbol>
-        </returnStatement>
-      </statements>
-      <symbol> } </symbol>
-    </subroutineBody>
-  </subroutineDec>
+  <classVarDec>
+    <keyword> field </keyword>
+    <identifier> String </identifier>
+    <identifier> msg </identifier>
+    <symbol> ; </symbol>
+  </classVarDec>
   <subroutineDec>
     <keyword> function </keyword>
     <keyword> void </keyword>
@@ -147,63 +28,130 @@
       <symbol> { </symbol>
       <varDec>
         <keyword> var </keyword>
-        <identifier> Test </identifier>
-        <identifier> t </identifier>
+        <keyword> int </keyword>
+        <identifier> a </identifier>
+        <symbol> , </symbol>
+        <identifier> b </identifier>
         <symbol> ; </symbol>
       </varDec>
       <varDec>
         <keyword> var </keyword>
-        <keyword> int </keyword>
-        <identifier> total </identifier>
+        <identifier> String </identifier>
+        <identifier> s </identifier>
+        <symbol> ; </symbol>
+      </varDec>
+      <varDec>
+        <keyword> var </keyword>
+        <identifier> TermTest </identifier>
+        <identifier> obj </identifier>
         <symbol> ; </symbol>
       </varDec>
       <statements>
         <letStatement>
           <keyword> let </keyword>
-          <identifier> t </identifier>
+          <identifier> a </identifier>
           <symbol> = </symbol>
           <expression>
             <term>
-              <identifier> Test </identifier>
-              <symbol> . </symbol>
-              <identifier> new </identifier>
-              <symbol> ( </symbol>
-              <expressionList>
-                <expression>
-                  <term>
-                    <integerConstant> 3 </integerConstant>
-                  </term>
-                </expression>
-                <symbol> , </symbol>
-                <expression>
-                  <term>
-                    <integerConstant> 4 </integerConstant>
-                  </term>
-                </expression>
-              </expressionList>
-              <symbol> ) </symbol>
+              <integerConstant> 10 </integerConstant>
             </term>
           </expression>
           <symbol> ; </symbol>
         </letStatement>
         <letStatement>
           <keyword> let </keyword>
-          <identifier> total </identifier>
+          <identifier> b </identifier>
           <symbol> = </symbol>
           <expression>
             <term>
-              <identifier> t </identifier>
-              <symbol> . </symbol>
-              <identifier> add </identifier>
-              <symbol> ( </symbol>
-              <expressionList>
-                <expression>
-                  <term>
-                    <integerConstant> 5 </integerConstant>
-                  </term>
-                </expression>
-              </expressionList>
-              <symbol> ) </symbol>
+              <identifier> a </identifier>
+            </term>
+            <symbol> + </symbol>
+            <term>
+              <integerConstant> 5 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> s </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <stringConstant> Hello </stringConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> x </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <integerConstant> 0 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> y </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <integerConstant> 1 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> msg </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <identifier> s </identifier>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> a </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <symbol> - </symbol>
+              <term>
+                <identifier> b </identifier>
+              </term>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> b </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <symbol> ~ </symbol>
+              <term>
+                <identifier> a </identifier>
+              </term>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> obj </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <keyword> this </keyword>
             </term>
           </expression>
           <symbol> ; </symbol>
@@ -217,7 +165,7 @@
           <expressionList>
             <expression>
               <term>
-                <identifier> total </identifier>
+                <identifier> a </identifier>
               </term>
             </expression>
           </expressionList>
@@ -228,15 +176,101 @@
           <keyword> do </keyword>
           <identifier> Output </identifier>
           <symbol> . </symbol>
-          <identifier> println </identifier>
+          <identifier> printInt </identifier>
           <symbol> ( </symbol>
           <expressionList>
+            <expression>
+              <term>
+                <identifier> obj </identifier>
+                <symbol> . </symbol>
+                <identifier> add </identifier>
+                <symbol> ( </symbol>
+                <expressionList>
+                  <expression>
+                    <term>
+                      <identifier> b </identifier>
+                    </term>
+                  </expression>
+                </expressionList>
+                <symbol> ) </symbol>
+              </term>
+            </expression>
           </expressionList>
           <symbol> ) </symbol>
           <symbol> ; </symbol>
         </doStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> x </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <identifier> y </identifier>
+              <symbol> [ </symbol>
+              <expression>
+                <term>
+                  <integerConstant> 0 </integerConstant>
+                </term>
+              </expression>
+              <symbol> ] </symbol>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> y </identifier>
+          <symbol> [ </symbol>
+          <expression>
+            <term>
+              <integerConstant> 0 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ] </symbol>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <identifier> a </identifier>
+            </term>
+            <symbol> + </symbol>
+            <term>
+              <identifier> b </identifier>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
         <returnStatement>
           <keyword> return </keyword>
+          <symbol> ; </symbol>
+        </returnStatement>
+      </statements>
+      <symbol> } </symbol>
+    </subroutineBody>
+  </subroutineDec>
+  <subroutineDec>
+    <keyword> method </keyword>
+    <keyword> int </keyword>
+    <identifier> add </identifier>
+    <symbol> ( </symbol>
+    <parameterList>
+      <keyword> int </keyword>
+      <identifier> n </identifier>
+    </parameterList>
+    <symbol> ) </symbol>
+    <subroutineBody>
+      <symbol> { </symbol>
+      <statements>
+        <returnStatement>
+          <keyword> return </keyword>
+          <expression>
+            <term>
+              <identifier> n </identifier>
+            </term>
+            <symbol> + </symbol>
+            <term>
+              <identifier> x </identifier>
+            </term>
+          </expression>
           <symbol> ; </symbol>
         </returnStatement>
       </statements>

@@ -1,9 +1,41 @@
+push constant 10
+push local 0
+push constant 5
 add
-sub
+push constant 5
+call String.new 1
+push constant 72
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 108
+call String.appendChar 2
+push constant 108
+call String.appendChar 2
+push constant 111
+call String.appendChar 2
+push constant 0
+push constant 1
+push local 2
+push local 1
 neg
-eq
-gt
-lt
-and
-or
+push local 0
 not
+push this 0
+push local 0
+push local 3
+push local 3
+push local 1
+call TermTest.add 2
+push this 1
+push constant 0
+add
+pop pointer 1
+push that 0
+push constant 0
+push local 0
+push local 1
+add
+push local 0
+push this 0
+add
