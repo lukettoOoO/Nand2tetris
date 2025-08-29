@@ -1189,6 +1189,7 @@ void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
             {
                 //VM
                 int nArgs = 0;
+                char* simpleSubroutineName = token[currentCompileTokenIndex - 1];
 
                 //'('
                 printIndent(outputFile);
@@ -1201,6 +1202,7 @@ void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
                 printToken(outputFile, token);
                 currentCompileTokenIndex++;
                 //VM
+                strcat(subroutineName, simpleSubroutineName);
                 WritePush(outputVMFile, POINTER_SEGMENT, 0);
                 nArgs++;
                 WriteCall(outputVMFile, subroutineName, nArgs);
@@ -1209,13 +1211,9 @@ void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
             {
                 //VM
                 char fullSubroutineName[256];
-                bool isVariable = true;
                 int nArgs = 0;
                 Symbol* sym = lookup(token[currentCompileTokenIndex - 1]);
-                if(sym != NULL)
-                    isVariable = true;
-                else
-                    isVariable = false;
+                bool isVariable = (sym != NULL);
                 char* tokenBeforeDot = token[currentCompileTokenIndex - 1];
                 if(isVariable)
                     WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);
@@ -1224,7 +1222,7 @@ void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
                 printIndent(outputFile);
                 printToken(outputFile, token);
                 currentCompileTokenIndex++;
-                //subroutineName
+                // subroutineName
                 printIndent(outputFile);
                 printToken(outputFile, token);
                 //VM
@@ -1246,11 +1244,11 @@ void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
                 printIndent(outputFile);
                 printToken(outputFile, token);
                 currentCompileTokenIndex++;
-                //expressionList
-                nArgs = CompileExpressionList(outputFile, outputVMFile, token); //(VM)
+                // expressionList
+                nArgs = CompileExpressionList(outputFile, outputVMFile, token);
+                
                 //VM
-                if(isVariable)
-                    nArgs++;
+                if(isVariable) nArgs++;
                 WriteCall(outputVMFile, fullSubroutineName, nArgs);
 
                 //')'
@@ -1372,6 +1370,9 @@ void compileLet(FILE* outputFile, FILE* outputVMFile, char** token)
     //varName
     printIndent(outputFile);
     printToken(outputFile, token);
+    //VM
+    Symbol *sym = lookup(token[currentCompileTokenIndex]);
+
     currentCompileTokenIndex++;
     //('[' expression ']')?
     if(strcmp(token[currentCompileTokenIndex], "[") == 0)
@@ -1386,17 +1387,37 @@ void compileLet(FILE* outputFile, FILE* outputVMFile, char** token)
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
+        //'='
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //expression
+        CompileExpression(outputFile, outputVMFile, token);
+        //';'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //VM
+        WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);  // base address
+        WriteArithmetic(outputVMFile, ADD_COMMAND);                     // base + index
+        WritePop(outputVMFile, POINTER_SEGMENT, 1);                     // THAT points to target
+        WritePop(outputVMFile, THAT_SEGMENT, 0);                        // pop value into array element
     }
-    //'='
-    printIndent(outputFile);
-    printToken(outputFile, token);
-    currentCompileTokenIndex++;
-    //expression
-    CompileExpression(outputFile, outputVMFile, token);
-    //';'
-    printIndent(outputFile);
-    printToken(outputFile, token);
-    currentCompileTokenIndex++;
+    else
+    {
+        //'='
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //expression
+        CompileExpression(outputFile, outputVMFile, token);
+        //';'
+        printIndent(outputFile);
+        printToken(outputFile, token);
+        currentCompileTokenIndex++;
+        //VM
+        WritePop(outputVMFile, kindToSegment(sym->kind), sym->index);
+    }
 
     indentLevel--;
     printIndent(outputFile);
@@ -1442,6 +1463,7 @@ void compileWhile(FILE* outputFile, FILE* outputVMFile, char** token)
 
 void compileReturn(FILE* outputFile, FILE* outputVMFile, char** token)
 {
+    bool isVoidReturn = true;
     //'return' expression? ';'
     printIndent(outputFile);
     fprintf(outputFile, "<returnStatement>\n");
@@ -1455,11 +1477,20 @@ void compileReturn(FILE* outputFile, FILE* outputVMFile, char** token)
     if(strcmp(token[currentCompileTokenIndex], ";") != 0)
     {
         CompileExpression(outputFile, outputVMFile, token);
+        //VM
+        WriteReturn(outputVMFile);
+        isVoidReturn = false;
     }
     //';'
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
+    //VM
+    if(isVoidReturn)
+    {
+        WritePush(outputVMFile, CONST_SEGMENT, 0);
+        WriteReturn(outputVMFile);
+    }
 
     indentLevel--;
     printIndent(outputFile);

@@ -3,3 +3,5 @@ push constant 2
 push constant 3
 call Math.multiply 2
 add
+push constant 0
+return

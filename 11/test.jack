@@ -1,35 +1,28 @@
-// TermTest.jack
-class TermTest {
+// CallTest.jack
+class CallTest {
 
     field int x, y;
-    field String msg;
 
     function void main() {
-        var int a, b;
+        var int a;
+        var CallTest obj;
         var String s;
-        var TermTest obj;
 
-        let a = 10;                    // integer constant
-        let b = a + 5;                 // binary op with variable
-        let s = "Hello";               // string constant
-        let x = 0;                      // field variable
-        let y = 1;                      // field variable
-        let msg = s;                    // field String
+        let a = 10;               // simple variable
+        let obj = this;            // object variable
 
-        let a = -b;                     // unary minus
-        let b = ~a;                     // unary NOT
-
-        let obj = this;                 // variable pointing to current object
-        do Output.printInt(a);          // simple call
-        do Output.printInt(obj.add(b)); // dotted call on object
-
-        let x = y[0];                   // array access example
-        let y[0] = a + b;               // array assignment with expression
-
-        return;
+        do Output.printInt(a);     // simple call to current object
+        do Output.printInt(obj.add(a)); // method call on object variable
+        do Output.printInt(CallTest.staticAdd(a, 5)); // static/class call
+        let s = String.new(3);    // constructor call
+        do s.appendChar(72);      // method call on object (String)
     }
 
     method int add(int n) {
-        return n + x;                   // simple arithmetic return
+        return n + x;             // returns n + field x
+    }
+
+    function int staticAdd(int p, int q) {
+        return p + q;             // returns sum
     }
 }
