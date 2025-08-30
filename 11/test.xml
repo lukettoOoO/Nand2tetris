@@ -87,9 +87,8 @@
             <expression>
               <term>
                 <identifier> obj </identifier>
-                <symbol> . </symbol>
                 <identifier> add </identifier>
-                <symbol> ( </symbol>
+                <identifier> a </identifier>
                 <expressionList>
                   <expression>
                     <term>
@@ -114,9 +113,8 @@
             <expression>
               <term>
                 <identifier> CallTest </identifier>
-                <symbol> . </symbol>
                 <identifier> staticAdd </identifier>
-                <symbol> ( </symbol>
+                <identifier> a </identifier>
                 <expressionList>
                   <expression>
                     <term>
@@ -144,9 +142,8 @@
           <expression>
             <term>
               <identifier> String </identifier>
-              <symbol> . </symbol>
               <identifier> new </identifier>
-              <symbol> ( </symbol>
+              <integerConstant> 3 </integerConstant>
               <expressionList>
                 <expression>
                   <term>
@@ -154,7 +151,7 @@
                   </term>
                 </expression>
               </expressionList>
-              <symbol> ) </symbol>
+              <symbol> ; </symbol>
             </term>
           </expression>
           <symbol> ; </symbol>
