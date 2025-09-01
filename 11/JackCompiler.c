@@ -27,6 +27,9 @@ int subroutineTableIndex = 0;
 
 char currentClass[256];
 
+int if_label_count = 0;
+int while_label_count = 0;
+
 char *symbolList = "{}()[].,;+-*/&|<>=~";
 char *keywordList[] = {"class", "constructor", "function",
     "method", "field", "static", "var",
@@ -460,6 +463,22 @@ void handleArithmeticUnary(FILE* outputVMFile, char* currentToken)
         WriteArithmetic(outputVMFile, NEG_COMMAND);
     else
         WriteArithmetic(outputVMFile, NOT_COMMAND);
+}
+
+char* countIf()
+{
+    static char str[20];
+    sprintf(str, "%d", if_label_count);
+    if_label_count++;
+    return str;
+}
+
+char* countWhile()
+{
+    static char str[20];
+    sprintf(str, "%d", while_label_count);
+    while_label_count++;
+    return str;
 }
 
 //The JackTokenizer module:
@@ -1469,6 +1488,16 @@ void compileWhile(FILE* outputFile, FILE* outputVMFile, char** token)
     printIndent(outputFile);
     fprintf(outputFile, "<whileStatement>\n");
     indentLevel++;
+    //VM
+    char current_while_count[10];
+    strcpy(current_while_count, countWhile());
+    char start_label[20];
+    strcpy(start_label, "WHILE_START");
+    strcat(start_label, current_while_count);
+    char end_label[20];
+    strcpy(end_label, "WHILE_END");
+    strcat(end_label, current_while_count);
+    WriteLabel(outputVMFile, start_label);
 
     //'while'
     printIndent(outputFile);
@@ -1484,6 +1513,10 @@ void compileWhile(FILE* outputFile, FILE* outputVMFile, char** token)
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
+    //VM
+    WriteArithmetic(outputVMFile, NOT_COMMAND);
+    WriteIf(outputVMFile, end_label);
+
     //'{'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1494,6 +1527,9 @@ void compileWhile(FILE* outputFile, FILE* outputVMFile, char** token)
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
+    //VM
+    WriteGoto(outputVMFile, start_label);
+    WriteLabel(outputVMFile, end_label);
 
     indentLevel--;
     printIndent(outputFile);
@@ -1557,6 +1593,19 @@ void compileIf(FILE* outputFile, FILE* outputVMFile, char** token)
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
+    //VM
+    char current_if_count[10];
+    strcpy(current_if_count, countIf());
+    char false_label[20];
+    char end_label[20];
+    strcpy(false_label, "IF_FALSE");
+    strcat(false_label, current_if_count);
+    //printf("%s\n", false_label);
+    strcpy(end_label, "IF_END");
+    strcat(end_label, current_if_count);
+    WriteArithmetic(outputVMFile, NOT_COMMAND);
+    WriteIf(outputVMFile, false_label);
+
     //'{'
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -1567,9 +1616,15 @@ void compileIf(FILE* outputFile, FILE* outputVMFile, char** token)
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
+    //VM
+    WriteGoto(outputVMFile, end_label);
+
     //('else' '{' statements '}')?
     if(strcmp(token[currentCompileTokenIndex], "else") == 0)
     {
+        //VM
+        WriteLabel(outputVMFile, false_label);
+
         //'else'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1584,6 +1639,12 @@ void compileIf(FILE* outputFile, FILE* outputVMFile, char** token)
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
+        //VM
+        WriteLabel(outputVMFile, end_label);
+    }
+    else
+    {
+        WriteLabel(outputVMFile, false_label);
     }
 
     indentLevel--;
