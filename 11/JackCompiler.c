@@ -267,7 +267,7 @@ vm_segment kindToSegment(identifier_kind kind)
     case FIELD_SYMBOL:
         return THIS_SEGMENT;
     case ARG_SYMBOL:
-        return LOCAL_SEGMENT;
+        return ARG_SEGMENT;
     case VAR_SYMBOL:
         return LOCAL_SEGMENT;
     default:
@@ -1175,7 +1175,8 @@ void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
             Symbol* sym = lookup(token[currentCompileTokenIndex]);
             if(sym != NULL)
             {
-                WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);
+                if(strcmp(token[currentCompileTokenIndex + 1], ".") != 0)
+                    WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);
                 strcat(subroutineName, sym->name);
             }
             else
@@ -1492,7 +1493,7 @@ void compileWhile(FILE* outputFile, FILE* outputVMFile, char** token)
     char current_while_count[10];
     strcpy(current_while_count, countWhile());
     char start_label[20];
-    strcpy(start_label, "WHILE_START");
+    strcpy(start_label, "WHILE_EXP");
     strcat(start_label, current_while_count);
     char end_label[20];
     strcpy(end_label, "WHILE_END");
@@ -1695,6 +1696,8 @@ void compileStatements(FILE* outputFile, FILE* outputVMFile, char **token)
 
 void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
 {
+    //VM
+    char fullSubroutineName[100];
     startSubroutine();
 
     //subroutineDec: ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
@@ -1713,6 +1716,11 @@ void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
     //subroutineName
     printIndent(outputFile);
     printToken(outputFile, token);
+    //VM
+    strcpy(fullSubroutineName, currentClass);
+    strcat(fullSubroutineName, ".");
+    strcat(fullSubroutineName, token[currentCompileTokenIndex]);
+
     currentCompileTokenIndex++;
     //'('
     printIndent(outputFile);
@@ -1746,6 +1754,9 @@ void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
     //varDec*
     while(strcmp(token[currentCompileTokenIndex], "var") == 0)
         compileVarDec(outputFile, outputVMFile, token);
+    //VM
+    WriteFunction(outputVMFile, fullSubroutineName, varCount);
+
     //statements
     compileStatements(outputFile, outputVMFile, token);
     //'}'

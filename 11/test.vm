@@ -6,7 +6,6 @@ push local 0
 call Output.printInt 1
 pop temp 0
 push local 1
-push local 1
 push local 0
 call CallTest.add 2
 call Output.printInt 1
