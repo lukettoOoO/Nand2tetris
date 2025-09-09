@@ -965,9 +965,10 @@ void CompileClassVarDec(FILE* outputFile, FILE* outputVMFile, char **token)
     fprintf(outputFile, "</classVarDec>\n");
 }
 
-void compileParameterList(FILE* outputFile, FILE* outputVMFile, char **token)
+int compileParameterList(FILE* outputFile, FILE* outputVMFile, char **token)
 {   
     //((type varName) (',' type varName)*)?
+    int paramCount = 0;
     //type
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -978,6 +979,7 @@ void compileParameterList(FILE* outputFile, FILE* outputVMFile, char **token)
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
+    paramCount++;
     while(strcmp(token[currentCompileTokenIndex], ",") == 0)
     {
         //','
@@ -994,7 +996,9 @@ void compileParameterList(FILE* outputFile, FILE* outputVMFile, char **token)
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
+        paramCount++;
     }
+    return paramCount;
 }
 
 void compileVarDec(FILE* outputFile, FILE* outputVMFile, char **token)
@@ -1720,6 +1724,7 @@ void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
     startSubroutine();
     if_label_count = 0;
     while_label_count = 0;
+    char subroutineType[20];
 
     //subroutineDec: ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
     printIndent(outputFile);
@@ -1729,6 +1734,7 @@ void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
     //('constructor' | 'function' | 'method')
     printIndent(outputFile);
     printToken(outputFile, token);
+    strcpy(subroutineType, token[currentCompileTokenIndex]);
     currentCompileTokenIndex++;
     //('void' | type)
     printIndent(outputFile);
@@ -1777,6 +1783,17 @@ void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
         compileVarDec(outputFile, outputVMFile, token);
     //VM
     WriteFunction(outputVMFile, fullSubroutineName, varCount);
+    if(strcmp(subroutineType, "constructor") == 0)
+    {
+        WritePush(outputVMFile, CONST_SEGMENT, fieldCount);
+        WriteCall(outputVMFile, "Memory.alloc", 1);
+        WritePop(outputVMFile, POINTER_SEGMENT, 0);
+    }
+    else if(strcmp(subroutineType, "method") == 0)
+    {
+        WritePush(outputVMFile, ARG_SEGMENT, 0);
+        WritePop(outputVMFile, POINTER_SEGMENT, 0);
+    }
 
     //statements
     compileStatements(outputFile, outputVMFile, token);
