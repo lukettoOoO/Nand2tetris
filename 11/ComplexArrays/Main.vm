@@ -405,9 +405,8 @@ pop local 2
 push local 2
 push constant 0
 eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push local 0
 push constant 10
 call Main.fill 2

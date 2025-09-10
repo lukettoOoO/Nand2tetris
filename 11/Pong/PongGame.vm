@@ -120,9 +120,8 @@ label WHILE_END1
 push local 0
 push constant 130
 eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push this 0
 push constant 1
 call Bat.setDirection 2
@@ -132,9 +131,8 @@ label IF_FALSE0
 push local 0
 push constant 132
 eq
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+not
+if-goto IF_FALSE1
 push this 0
 push constant 2
 call Bat.setDirection 2
@@ -144,9 +142,8 @@ label IF_FALSE1
 push local 0
 push constant 140
 eq
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
+not
+if-goto IF_FALSE2
 push constant 1
 neg
 pop this 3
@@ -181,9 +178,8 @@ label WHILE_END2
 goto WHILE_EXP0
 label WHILE_END0
 push this 3
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
+not
+if-goto IF_FALSE3
 push constant 10
 push constant 27
 call Output.moveCursor 2
@@ -229,9 +225,8 @@ push this 5
 eq
 not
 and
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push this 2
 pop this 5
 push constant 0
@@ -251,9 +246,8 @@ pop local 4
 push this 2
 push constant 4
 eq
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+not
+if-goto IF_FALSE1
 push local 1
 push local 4
 gt
@@ -264,17 +258,15 @@ or
 pop this 3
 push this 3
 not
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
+not
+if-goto IF_FALSE2
 push local 4
 push local 1
 push constant 10
 add
 lt
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
+not
+if-goto IF_FALSE3
 push constant 1
 neg
 pop local 0
@@ -285,9 +277,8 @@ push local 2
 push constant 10
 sub
 gt
-if-goto IF_TRUE4
-goto IF_FALSE4
-label IF_TRUE4
+not
+if-goto IF_FALSE4
 push constant 1
 pop local 0
 goto IF_END4

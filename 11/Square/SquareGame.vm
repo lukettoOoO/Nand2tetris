@@ -28,9 +28,8 @@ pop pointer 0
 push this 1
 push constant 1
 eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push this 0
 call Square.moveUp 1
 pop temp 0
@@ -40,9 +39,8 @@ label IF_END0
 push this 1
 push constant 2
 eq
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+not
+if-goto IF_FALSE1
 push this 0
 call Square.moveDown 1
 pop temp 0
@@ -52,9 +50,8 @@ label IF_END1
 push this 1
 push constant 3
 eq
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
+not
+if-goto IF_FALSE2
 push this 0
 call Square.moveLeft 1
 pop temp 0
@@ -64,9 +61,8 @@ label IF_END2
 push this 1
 push constant 4
 eq
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
+not
+if-goto IF_FALSE3
 push this 0
 call Square.moveRight 1
 pop temp 0
@@ -104,9 +100,8 @@ label WHILE_END1
 push local 0
 push constant 81
 eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push constant 1
 neg
 pop local 1
@@ -116,9 +111,8 @@ label IF_END0
 push local 0
 push constant 90
 eq
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+not
+if-goto IF_FALSE1
 push this 0
 call Square.decSize 1
 pop temp 0
@@ -128,9 +122,8 @@ label IF_END1
 push local 0
 push constant 88
 eq
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
+not
+if-goto IF_FALSE2
 push this 0
 call Square.incSize 1
 pop temp 0
@@ -140,9 +133,8 @@ label IF_END2
 push local 0
 push constant 131
 eq
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
+not
+if-goto IF_FALSE3
 push constant 1
 pop this 1
 goto IF_END3
@@ -151,9 +143,8 @@ label IF_END3
 push local 0
 push constant 133
 eq
-if-goto IF_TRUE4
-goto IF_FALSE4
-label IF_TRUE4
+not
+if-goto IF_FALSE4
 push constant 2
 pop this 1
 goto IF_END4
@@ -162,9 +153,8 @@ label IF_END4
 push local 0
 push constant 130
 eq
-if-goto IF_TRUE5
-goto IF_FALSE5
-label IF_TRUE5
+not
+if-goto IF_FALSE5
 push constant 3
 pop this 1
 goto IF_END5
@@ -173,9 +163,8 @@ label IF_END5
 push local 0
 push constant 132
 eq
-if-goto IF_TRUE6
-goto IF_FALSE6
-label IF_TRUE6
+not
+if-goto IF_FALSE6
 push constant 4
 pop this 1
 goto IF_END6

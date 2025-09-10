@@ -32,18 +32,16 @@ push local 1
 push constant 16
 gt
 not
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push argument 0
 push local 0
 and
 push constant 0
 eq
 not
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+not
+if-goto IF_FALSE1
 push constant 8000
 push local 1
 add
@@ -72,9 +70,8 @@ function Main.nextMask 0
 push argument 0
 push constant 0
 eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push constant 1
 return
 goto IF_END0

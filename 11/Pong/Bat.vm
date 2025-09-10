@@ -101,9 +101,8 @@ pop pointer 0
 push this 4
 push constant 1
 eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push this 0
 push constant 4
 sub
@@ -111,9 +110,8 @@ pop this 0
 push this 0
 push constant 0
 lt
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+not
+if-goto IF_FALSE1
 push constant 0
 pop this 0
 goto IF_END1
@@ -163,9 +161,8 @@ push this 2
 add
 push constant 511
 gt
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
+not
+if-goto IF_FALSE2
 push constant 511
 push this 2
 sub

@@ -105,9 +105,8 @@ push local 1
 lt
 pop this 7
 push this 7
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push local 0
 pop local 2
 push local 1
@@ -160,9 +159,8 @@ pop temp 0
 push this 4
 push constant 0
 lt
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push this 4
 push this 5
 add
@@ -174,13 +172,11 @@ push this 6
 add
 pop this 4
 push this 9
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+not
+if-goto IF_FALSE1
 push this 7
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
+not
+if-goto IF_FALSE2
 push this 0
 push constant 4
 add
@@ -195,9 +191,8 @@ label IF_END2
 goto IF_END1
 label IF_FALSE1
 push this 7
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
+not
+if-goto IF_FALSE3
 push this 0
 push constant 4
 sub
@@ -212,13 +207,11 @@ label IF_END3
 label IF_END1
 label IF_END0
 push this 8
-if-goto IF_TRUE4
-goto IF_FALSE4
-label IF_TRUE4
+not
+if-goto IF_FALSE4
 push this 7
-if-goto IF_TRUE5
-goto IF_FALSE5
-label IF_TRUE5
+not
+if-goto IF_FALSE5
 push this 1
 push constant 4
 add
@@ -233,9 +226,8 @@ label IF_END5
 goto IF_END4
 label IF_FALSE4
 push this 7
-if-goto IF_TRUE6
-goto IF_FALSE6
-label IF_TRUE6
+not
+if-goto IF_FALSE6
 push this 1
 push constant 4
 sub
@@ -252,9 +244,8 @@ push this 0
 push this 10
 gt
 not
-if-goto IF_TRUE7
-goto IF_FALSE7
-label IF_TRUE7
+not
+if-goto IF_FALSE7
 push constant 1
 pop this 14
 push this 10
@@ -266,9 +257,8 @@ push this 0
 push this 11
 lt
 not
-if-goto IF_TRUE8
-goto IF_FALSE8
-label IF_TRUE8
+not
+if-goto IF_FALSE8
 push constant 2
 pop this 14
 push this 11
@@ -280,9 +270,8 @@ push this 1
 push this 12
 gt
 not
-if-goto IF_TRUE9
-goto IF_FALSE9
-label IF_TRUE9
+not
+if-goto IF_FALSE9
 push constant 3
 pop this 14
 push this 12
@@ -294,9 +283,8 @@ push this 1
 push this 13
 lt
 not
-if-goto IF_TRUE10
-goto IF_FALSE10
-label IF_TRUE10
+not
+if-goto IF_FALSE10
 push constant 4
 pop this 14
 push this 13
@@ -323,9 +311,8 @@ pop local 3
 push argument 1
 push constant 0
 eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push constant 10
 pop local 4
 goto IF_END0
@@ -347,9 +334,8 @@ neg
 eq
 and
 or
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+not
+if-goto IF_FALSE1
 push constant 20
 pop local 4
 goto IF_END1
@@ -361,9 +347,8 @@ label IF_END0
 push this 14
 push constant 1
 eq
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
+not
+if-goto IF_FALSE2
 push constant 506
 pop local 0
 push local 3
@@ -384,9 +369,8 @@ label IF_FALSE2
 push this 14
 push constant 2
 eq
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
+not
+if-goto IF_FALSE3
 push constant 0
 pop local 0
 push local 3
@@ -406,9 +390,8 @@ label IF_FALSE3
 push this 14
 push constant 3
 eq
-if-goto IF_TRUE4
-goto IF_FALSE4
-label IF_TRUE4
+not
+if-goto IF_FALSE4
 push constant 250
 pop local 1
 push local 2

@@ -1613,7 +1613,7 @@ void compileIf(FILE* outputFile, FILE* outputVMFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //VM
-    /*char current_if_count[10];
+    char current_if_count[10];
     strcpy(current_if_count, countIf());
     char false_label[20];
     char end_label[20];
@@ -1623,21 +1623,7 @@ void compileIf(FILE* outputFile, FILE* outputVMFile, char** token)
     strcpy(end_label, "IF_END");
     strcat(end_label, current_if_count);
     WriteArithmetic(outputVMFile, NOT_COMMAND);
-    WriteIf(outputVMFile, false_label);*/
-    char current_if_count[10];
-    strcpy(current_if_count, countIf());
-    char true_label[20];
-    char false_label[20];
-    char end_label[20];
-    strcpy(true_label, "IF_TRUE");
-    strcat(true_label, current_if_count);
-    strcpy(false_label, "IF_FALSE");
-    strcat(false_label, current_if_count);
-    strcpy(end_label, "IF_END");
-    strcat(end_label, current_if_count);
-    WriteIf(outputVMFile, true_label);
-    WriteGoto(outputVMFile, false_label);
-    WriteLabel(outputVMFile, true_label);
+    WriteIf(outputVMFile, false_label);
 
     //'{'
     printIndent(outputFile);
@@ -1650,16 +1636,12 @@ void compileIf(FILE* outputFile, FILE* outputVMFile, char** token)
     printToken(outputFile, token);
     currentCompileTokenIndex++;
     //VM
-    //WriteGoto(outputVMFile, end_label);
     WriteGoto(outputVMFile, end_label);
     WriteLabel(outputVMFile, false_label);
 
     //('else' '{' statements '}')?
     if(strcmp(token[currentCompileTokenIndex], "else") == 0)
     {
-        //VM
-        //WriteLabel(outputVMFile, false_label);
-
         //'else'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1674,16 +1656,10 @@ void compileIf(FILE* outputFile, FILE* outputVMFile, char** token)
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
-        //VM
-        //WriteLabel(outputVMFile, end_label);
     }
-    else
-    {
-        //WriteLabel(outputVMFile, false_label);
-    }
-    //VM
+     //VM
     WriteLabel(outputVMFile, end_label);
-
+    
     indentLevel--;
     printIndent(outputFile);
     fprintf(outputFile, "</ifStatement>\n");

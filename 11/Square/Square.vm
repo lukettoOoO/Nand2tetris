@@ -72,9 +72,8 @@ add
 push constant 510
 lt
 and
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push pointer 0
 call Square.erase 1
 pop temp 0
@@ -96,9 +95,8 @@ pop pointer 0
 push this 2
 push constant 2
 gt
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push pointer 0
 call Square.erase 1
 pop temp 0
@@ -120,9 +118,8 @@ pop pointer 0
 push this 1
 push constant 1
 gt
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push constant 0
 call Screen.setColor 1
 pop temp 0
@@ -171,9 +168,8 @@ push this 2
 add
 push constant 254
 lt
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push constant 0
 call Screen.setColor 1
 pop temp 0
@@ -220,9 +216,8 @@ pop pointer 0
 push this 0
 push constant 1
 gt
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push constant 0
 call Screen.setColor 1
 pop temp 0
@@ -271,9 +266,8 @@ push this 2
 add
 push constant 510
 lt
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+not
+if-goto IF_FALSE0
 push constant 0
 call Screen.setColor 1
 pop temp 0
