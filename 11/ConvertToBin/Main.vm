@@ -14,8 +14,8 @@ pop temp 0
 push constant 0
 return
 function Main.convert 3
-push constant 0
-not
+push constant 1
+neg
 pop local 2
 label WHILE_EXP0
 push local 2

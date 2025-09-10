@@ -15,8 +15,13 @@ class Test {
 
     // main function to test
     function void main() {
+        var Array arr, x;
         var Test t;
         var int result;
+
+        let arr = Array.new(5);
+        let arr[2] = x;
+        let x = arr[2];
 
         // create object using constructor
         let t = Test.new(3, 7);

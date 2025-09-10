@@ -1162,8 +1162,11 @@ void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
         {
             if(strcmp(token[currentCompileTokenIndex], "true") == 0)
             {
-                WritePush(outputVMFile, CONST_SEGMENT, 0);
-                WriteArithmetic(outputVMFile, NOT_COMMAND);
+                //changed from:
+                /*WritePush(outputVMFile, CONST_SEGMENT, 0);
+                WriteArithmetic(outputVMFile, NOT_COMMAND);*/
+                WritePush(outputVMFile, CONST_SEGMENT, 1);
+                WriteArithmetic(outputVMFile, NEG_COMMAND);
             }
             else if(strcmp(token[currentCompileTokenIndex], "false") == 0 || strcmp(token[currentCompileTokenIndex], "null") == 0)
             {
@@ -1171,7 +1174,8 @@ void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
             }
             else if(strcmp(token[currentCompileTokenIndex], "this") == 0)
             {
-                WritePush(outputVMFile, THIS_SEGMENT, 0);
+                //changed from THIS_SEGMENT to POINTER_SEGMENT
+                WritePush(outputVMFile, POINTER_SEGMENT, 0);
             }
         }
         else if(tokenType(token[currentCompileTokenIndex]) == IDENTIFIER)
@@ -1446,6 +1450,11 @@ void compileLet(FILE* outputFile, FILE* outputVMFile, char** token)
         currentCompileTokenIndex++;
         //expression
         CompileExpression(outputFile, outputVMFile, token);
+        //VM
+        WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);  // base address
+        WriteArithmetic(outputVMFile, ADD_COMMAND);                     // base + index
+
+
         //']'
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1456,15 +1465,17 @@ void compileLet(FILE* outputFile, FILE* outputVMFile, char** token)
         currentCompileTokenIndex++;
         //expression
         CompileExpression(outputFile, outputVMFile, token);
+        //VM
+        WritePop(outputVMFile, TEMP_SEGMENT, 0);
+        WritePop(outputVMFile, POINTER_SEGMENT, 1);                     // THAT points to target
+        WritePush(outputVMFile, TEMP_SEGMENT, 0);
+        WritePop(outputVMFile, THAT_SEGMENT, 0);
+
         //';'
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
         //VM
-        WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);  // base address
-        WriteArithmetic(outputVMFile, ADD_COMMAND);                     // base + index
-        WritePop(outputVMFile, POINTER_SEGMENT, 1);                     // THAT points to target
-        WritePop(outputVMFile, THAT_SEGMENT, 0);                        // pop value into array element
     }
     else
     {

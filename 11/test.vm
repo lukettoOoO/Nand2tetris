@@ -6,7 +6,7 @@ push argument 0
 pop this 0
 push argument 1
 pop this 1
-push this 0
+push pointer 0
 return
 function Test.sum 0
 push argument 0
@@ -15,13 +15,28 @@ push this 0
 push this 1
 add
 return
-function Test.main 2
+function Test.main 4
+push constant 5
+call Array.new 1
+pop local 0
+push constant 2
+push local 0
+add
+pop pointer 1
+push local 1
+pop that 0
+push local 0
+push constant 2
+add
+pop pointer 1
+push that 0
+pop local 1
 push constant 3
 push constant 7
 call Test.new 2
-pop local 0
-push local 0
+pop local 2
+push local 2
 call Test.sum 1
-pop local 1
+pop local 3
 push constant 0
 return
