@@ -965,10 +965,11 @@ void CompileClassVarDec(FILE* outputFile, FILE* outputVMFile, char **token)
     fprintf(outputFile, "</classVarDec>\n");
 }
 
-int compileParameterList(FILE* outputFile, FILE* outputVMFile, char **token)
+int compileParameterList(FILE* outputFile, FILE* outputVMFile, char **token, bool isMethod)
 {   
     //((type varName) (',' type varName)*)?
     int paramCount = 0;
+    int startIndex = isMethod ? 1 : 0; //skip ARG 0 for methods
     //type
     printIndent(outputFile);
     printToken(outputFile, token);
@@ -976,6 +977,7 @@ int compileParameterList(FILE* outputFile, FILE* outputVMFile, char **token)
     //varName
     //SYMBOL TABLE
     Define(token[currentCompileTokenIndex], token[currentCompileTokenIndex - 1], ARG_SYMBOL);
+    subroutineTable[subroutineTableIndex - 1].index += startIndex;
     printIndent(outputFile);
     printToken(outputFile, token);
     currentCompileTokenIndex++;
@@ -993,6 +995,7 @@ int compileParameterList(FILE* outputFile, FILE* outputVMFile, char **token)
         //varName
         //SYMBOL TABLE
         Define(token[currentCompileTokenIndex], token[currentCompileTokenIndex - 1], ARG_SYMBOL);
+        subroutineTable[subroutineTableIndex - 1].index += startIndex;
         printIndent(outputFile);
         printToken(outputFile, token);
         currentCompileTokenIndex++;
@@ -1451,9 +1454,8 @@ void compileLet(FILE* outputFile, FILE* outputVMFile, char** token)
         //expression
         CompileExpression(outputFile, outputVMFile, token);
         //VM
-        WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);  // base address
-        WriteArithmetic(outputVMFile, ADD_COMMAND);                     // base + index
-
+        WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);
+        WriteArithmetic(outputVMFile, ADD_COMMAND);
 
         //']'
         printIndent(outputFile);
@@ -1467,7 +1469,7 @@ void compileLet(FILE* outputFile, FILE* outputVMFile, char** token)
         CompileExpression(outputFile, outputVMFile, token);
         //VM
         WritePop(outputVMFile, TEMP_SEGMENT, 0);
-        WritePop(outputVMFile, POINTER_SEGMENT, 1);                     // THAT points to target
+        WritePop(outputVMFile, POINTER_SEGMENT, 1);
         WritePush(outputVMFile, TEMP_SEGMENT, 0);
         WritePop(outputVMFile, THAT_SEGMENT, 0);
 
@@ -1736,6 +1738,7 @@ void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
     if_label_count = 0;
     while_label_count = 0;
     char subroutineType[20];
+    bool isMethod = false;
 
     //subroutineDec: ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
     printIndent(outputFile);
@@ -1746,6 +1749,8 @@ void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
     printIndent(outputFile);
     printToken(outputFile, token);
     strcpy(subroutineType, token[currentCompileTokenIndex]);
+    if(strcmp(subroutineType, "method") == 0)
+        isMethod = true;
     currentCompileTokenIndex++;
     //('void' | type)
     printIndent(outputFile);
@@ -1770,7 +1775,7 @@ void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
     indentLevel++;
     if(strcmp(token[currentCompileTokenIndex], ")") != 0)
     {
-        compileParameterList(outputFile, outputVMFile, token);
+        compileParameterList(outputFile, outputVMFile, token, isMethod);
     }
     indentLevel--;
     printIndent(outputFile);
@@ -1802,6 +1807,7 @@ void CompileSubroutine(FILE* outputFile, FILE* outputVMFile, char **token)
     }
     else if(strcmp(subroutineType, "method") == 0)
     {
+        Define("this", currentClass, ARG_SYMBOL);
         WritePush(outputVMFile, ARG_SEGMENT, 0);
         WritePop(outputVMFile, POINTER_SEGMENT, 0);
     }
