@@ -1190,8 +1190,6 @@ void CompileTerm(FILE* outputFile, FILE* outputVMFile, char** token)
                     WritePush(outputVMFile, kindToSegment(sym->kind), sym->index);
                 strcat(subroutineName, sym->name);
             }
-            else
-                fprintf(stderr, "(CompileTerm): Variable not found: %s\n", token[currentCompileTokenIndex]);
         }
 
         currentCompileTokenIndex++;
@@ -1352,6 +1350,9 @@ void compileDo(FILE* outputFile, FILE* outputVMFile, char** token)
     currentCompileTokenIndex++;
     if(strcmp(token[currentCompileTokenIndex], "(") == 0)
     {
+        //VM
+        WritePush(outputVMFile, POINTER_SEGMENT, 0);
+
         //'('
         printIndent(outputFile);
         printToken(outputFile, token);
@@ -1365,7 +1366,6 @@ void compileDo(FILE* outputFile, FILE* outputVMFile, char** token)
         currentCompileTokenIndex++;
         //VM
         strcat(subroutineName, firstToken);
-        WritePush(outputVMFile, POINTER_SEGMENT, 0);
         WriteCall(outputVMFile, subroutineName, nArgs);
     }
     else if(strcmp(token[currentCompileTokenIndex], ".") == 0)
