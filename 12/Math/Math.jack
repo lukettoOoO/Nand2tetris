@@ -1,0 +1,32 @@
+class Math {
+    
+    function int multiply(int x, int y) 
+    {
+
+    }
+
+    function int divide(int x, int y) 
+    {
+        
+    }
+
+    function int sqrt(int x) 
+    {
+
+    }
+
+    function int abs(int x) 
+    {
+
+    }
+
+    function int min(int x, int y) 
+    {
+
+    }
+
+    function int max(int x, int y) 
+    {
+
+    }
+}

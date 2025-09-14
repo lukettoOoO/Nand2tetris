@@ -1,0 +1,22 @@
+class Memory {
+
+    function int peek(int address)
+    {
+
+    }
+
+    function void poke(int address, int value)
+    {
+
+    }
+
+    function Array alloc(int size)
+    {
+
+    }
+
+    function void deAlloc(Array o)
+    {
+
+    }
+}
