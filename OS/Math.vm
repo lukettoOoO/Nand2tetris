@@ -1,0 +1,114 @@
+function Math.multiply 3
+    push constant 0
+    pop local 0
+    push constant 0
+    pop local 2
+    push argument 0
+    push constant 0
+    lt
+    not
+    if-goto Math_1
+    push argument 0
+    neg
+    pop argument 0
+    push constant 1
+    push local 2
+    sub
+    pop local 2
+    goto Math_0
+label Math_1
+label Math_0
+    push argument 1
+    push constant 0
+    lt
+    not
+    if-goto Math_3
+    push argument 1
+    neg
+    pop argument 1
+    push constant 1
+    push local 2
+    sub
+    pop local 2
+    goto Math_2
+label Math_3
+label Math_2
+    push constant 0
+    pop local 1
+label Math_4
+    push local 1
+    push argument 1
+    lt
+    not
+    if-goto Math_5
+    push local 0
+    push argument 0
+    add
+    pop local 0
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Math_4
+label Math_5
+    push local 2
+    push constant 1
+    eq
+    not
+    if-goto Math_7
+    push local 0
+    neg
+    pop local 0
+    goto Math_6
+label Math_7
+label Math_6
+    push local 0
+    return
+function Math.divide 0
+    push constant 1
+    neg
+    return
+function Math.sqrt 0
+    push constant 1
+    neg
+    return
+function Math.abs 0
+    push argument 0
+    push constant 0
+    lt
+    not
+    if-goto Math_9
+    push argument 0
+    neg
+    pop argument 0
+    goto Math_8
+label Math_9
+label Math_8
+    push argument 0
+    return
+function Math.min 0
+    push argument 0
+    push argument 1
+    lt
+    not
+    if-goto Math_11
+    push argument 0
+    return
+    goto Math_10
+label Math_11
+    push argument 1
+    return
+label Math_10
+function Math.max 0
+    push argument 0
+    push argument 1
+    gt
+    not
+    if-goto Math_13
+    push argument 0
+    return
+    goto Math_12
+label Math_13
+    push argument 1
+    return
+label Math_12
