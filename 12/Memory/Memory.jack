@@ -2,7 +2,7 @@ class Memory {
 
     function int peek(int address)
     {
-
+        
     }
 
     function void poke(int address, int value)
