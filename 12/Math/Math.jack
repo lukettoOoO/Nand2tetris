@@ -59,21 +59,16 @@ class Math {
 
     function int sqrt(int x) 
     {
-        var int y, j, twoPow;
-
-        let y = 0;
-        let j = 7;
-
-        while (j >= 0) {
-            let twoPow = 1;
-            let twoPow = twoPow << j;
-            if ((y + twoPow) * (y + twoPow) <= x) {
-                let y = y + twoPow;
-            }
-            let j = j - 1;
+        var int last_i;
+        var int i;
+        var int end;
+        let end = x/2;
+        while (i<end){
+                if (((i * i) > x)|(i*i < 0)){return last_i;}
+                let last_i = i;
+                let i = i + 1;
         }
-
-        return y;
+        return last_i;
     }
 
     function int abs(int x) 
