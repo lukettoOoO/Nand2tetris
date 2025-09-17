@@ -5,7 +5,7 @@ class Math {
         var int sum, i, neg;
 
         let sum = 0;
-        let neg = 0; //0 - pos, 1 - neg
+        let neg = 0; //0 - pos, 1 - neg (result)
 
         if (x < 0) {
             let x = -x;
@@ -31,12 +31,49 @@ class Math {
 
     function int divide(int x, int y) 
     {
-        return -1;
+        var int count, neg;
+        
+        let neg = 0; //0 - pos, 1 - neg (result)
+
+        if (x < 0) {
+            let x = -x;
+            let neg = 1 - neg;
+        }
+        if (y < 0) {
+            let y = -y;
+            let neg = 1 - neg;
+        }
+
+        let count = 0;
+        while (~(x < y)) {
+            let x = x - y;
+            let count = count + 1;
+        }
+
+        if (neg = 1) {
+            let count = -count;
+        }
+
+        return count;
     }
 
     function int sqrt(int x) 
     {
-        return -1;  
+        var int y, j, twoPow;
+
+        let y = 0;
+        let j = 7;
+
+        while (j >= 0) {
+            let twoPow = 1;
+            let twoPow = twoPow << j;
+            if ((y + twoPow) * (y + twoPow) <= x) {
+                let y = y + twoPow;
+            }
+            let j = j - 1;
+        }
+
+        return y;
     }
 
     function int abs(int x) 
