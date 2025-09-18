@@ -2,33 +2,28 @@
 // and the book "The Elements of Computing Systems"
 // by Nisan and Schocken, MIT Press.
 
-/** Test program for the OS Screen class. */
+/** Test program for the OS Sys class. */
 class Main {
 
-    /** Draws a sample pictue on the screen using lines and circles. */
+    /** Tests the wait method of the Sys class. */
     function void main() {
-    
-        do Screen.drawLine(0,220,511,220);        // base line
-        do Screen.drawRectangle(280,90,410,220);  // house
-        
-        do Screen.setColor(false); 
-        do Screen.drawRectangle(350,120,390,219); // door
-        do Screen.drawRectangle(292,120,332,150); // window
-        
-        do Screen.setColor(true); 
-        do Screen.drawCircle(360,170,3);          // door handle
-        do Screen.drawLine(280,90,345,35);        // roof
-        do Screen.drawLine(345,35,410,90);        // roof
+        var char key;
 
-        do Screen.drawCircle(140,60,30);          // sun
-        do Screen.drawLine(140,26, 140, 6);       
-        do Screen.drawLine(163,35,178,20);       
-        do Screen.drawLine(174,60,194,60);       
-        do Screen.drawLine(163,85,178,100);       
-        do Screen.drawLine(140,94,140,114);       
-        do Screen.drawLine(117,85,102,100);       
-        do Screen.drawLine(106,60,86,60);       
-        do Screen.drawLine(117,35,102,20);       
+        do Output.printString("Wait test:");
+        do Output.println();
+        do Output.printString("Press any key. After 2 seconds, another message will be printed:");
+
+        while (key = 0) {
+	        let key = Keyboard.keyPressed();
+        }
+        while (~(key = 0)) {
+            let key = Keyboard.keyPressed();
+        }
+        
+        do Sys.wait(2000);
+
+        do Output.println();
+        do Output.printString("Time is up. Make sure that 2 seconds elapsed.");
         
         return;
     }
