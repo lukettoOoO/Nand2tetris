@@ -79,6 +79,7 @@ Each gate is verified using the Hardware Simulator with test scripts.
 *Example: Xor.hdl - implentation & testing using the Hardware Emulator*
 
 ![Xor gate implementation](https://github.com/lukettoOoO/Nand2tetris/blob/1d9557234294cab04a8a0113b08135ccb4fc7ea1/xor.png)
+*from "The Elements of Computer Systems" by Noam Nisan and Shimon Schocken*
 
 ![Xor gate testing](https://github.com/lukettoOoO/Nand2tetris/blob/627de22d0c837eb314a7d63dda1a0a7d337e706a/xor.gif)
 
@@ -174,3 +175,132 @@ that is dynamic is the symbol table). Except that, the program works with all th
 
 ![CPU Emulator](https://github.com/lukettoOoO/Nand2tetris/blob/831102490150773216d35b5b605ddc113b53213f/cpu_emulator.gif)
 
+### 7. Virtual Machine I: Stack Arithmetic
+This project implements the first stage of the Hack VM translator, converting VM code (.vm) into Hack assembly (.asm). It supports stack arithmetic and memory access commands.
+
+The translator works with both single .vm files and directories of .vm programs.
+
+```
+• File handling (openVM, openVMfile, setFileName) — detects if input is a file or directory, loads VM commands into memory (vm array), and prepares the output .asm file.
+• Command classification (commandType) — identifies whether a line is C_ARITHMETIC, C_PUSH, or C_POP.
+• Argument parsing (arg1, arg2) — extracts arguments for VM commands.
+• Initialization (Constructor) — writes bootstrap code (sets stack pointer and base addresses for segments).
+• Arithmetic translation (writeArithmetic) — generates Hack assembly for arithmetic/logical VM commands (add, sub, neg, eq, gt, lt, and, or, not).
+• Memory access translation (writePushPop) — handles push and pop for constant, local, argument, this, that, temp, pointer, and static segments.
+• File finalization (Close) — closes the output file after writing all assembly code.
+```
+Usage: `./VMtranslator *.vm` or `./VMtranslator *` where `*` is a directory
+
+*Example: SimpleAdd.vm → SimpleAdd.asm, ready to assemble and run on the Hack CPU.*
+
+### 8. Virtual Machine II: Program Control
+Chapter 8 extends the stack-based VM language introduced in Chapter 7.
+In addition to arithmetic and memory access, the VM now supports:
+
+	•	Program control: labels, unconditional jumps, conditional jumps.
+	
+	•	Function calling: defining functions, calling functions, and returning.
+
+The goal is to translate these high-level VM commands into Hack assembly so that any Jack program (with functions, loops, and recursion) can run on the Hack computer.
+
+```
+	•	File management:
+		•	isDirectory() and isVMfile() determine if the input is a .vm file or directory.
+		•	openVM() reads either a single file or all .vm files in a directory.
+		•	setFileName() ensures the correct .asm output filename.
+	•	Parsing:
+		•	commandType() classifies a line into C_ARITHMETIC, C_PUSH, C_POP, C_LABEL, C_GOTO, C_IF, C_FUNCTION, C_CALL, C_RETURN.
+		•	arg1() and arg2() extract arguments from VM commands.
+		•	removeWhitespace() and isBlankLine() clean input.
+	•	Code generation:
+		•	Arithmetic: writeArithmetic() generates Hack assembly for add, sub, neg, eq, gt, lt, and, or, not.
+		•	Memory access: writePushPop() handles push and pop for all VM segments (constant, local, argument, this, that, static, temp, pointer).
+		•	Program control:
+			•	writeLabel() → (functionName$label)
+			•	writeGoto() → 0;JMP
+			•	writeIf() → conditional jump (D;JNE)
+	•	Functions:
+		•	writeFunction() → creates function label and allocates local variables.
+		•	writeCall() → generates return address, saves LCL/ARG/THIS/THAT, repositions ARG and LCL, jumps to function.
+		•	writeReturn() → restores caller’s frame, jumps to return address.
+	•	Bootstrap:
+		•	Constructor() initializes the stack pointer (SP=256) and automatically calls Sys.init.
+```
+*Example: translating a simple function .vm file into an assembly .asm file*
+
+![VMtranslator](https://github.com/lukettoOoO/Nand2tetris/blob/293841fb164048a1495742ce0a6e2a7c1d186294/vm.gif)
+
+![Assembler](https://github.com/lukettoOoO/Nand2tetris/blob/a0ca3cdb8d1c458ab346332ac4b580fe166e46af/assembler1.gif)
+
+### 9. High-Level Language
+
+This project focuses on understanding the Jack programming language and focuses on building a simple app using the Jack language. Each app consists of multiple .jack files (classes).
+
+I implemented a Film Log application in Jack with two classes:
+
+```
+	•	Film — represents a movie with fields: title, year, rating, dateWatched. Includes getters and a setter for rating.
+	•	FilmLog — manages a list of films in an array. Supports:
+		•	addFilm(Film) — adds a film to the log (with max capacity).
+		•	getAverage() — computes the average rating of all films.
+		•	getHighestRating() — finds the film with the highest rating and returns its title.
+```
+
+This project demonstrates arrays, objects, loops, conditionals, and method calls in Jack, while simulating a small database-like program.
+
+*Example: Film.jack*
+
+```
+class Film {
+    field String title;
+    field int year;
+    field int rating;
+    field String dateWatched;
+    constructor Film new(String atitle, int ayear, int arating, String adateWatched) {
+        let title = atitle;
+        let year = ayear;
+        let rating = arating;
+        let dateWatched = adateWatched;
+        return this;
+    }
+    method void setRating(int arating) {
+        let rating = arating;
+        return;
+    }
+    method String getTitle() {
+        return title;
+    }
+    method int getYear() {
+        return year;
+    }
+    method int getRating() {
+        return rating;
+    }
+    method String getDateWatched() {
+        return dateWatched;
+    }
+}
+```
+
+### 10. Compiler I: Syntax Analysis
+
+This chapter is the first half of the Jack compiler implementation.
+The goal is to parse Jack source programs (.jack) and produce a structured representation of their syntax, without yet generating executable code.
+
+```
+	•	JackTokenizer
+		•	Reads .jack files and outputs tokenized elements.
+		•	Classifies tokens into types: keyword, symbol, identifier, int constant, string constant.
+	•	CompilationEngine
+		•	Reads tokens and recursively parses them according to the Jack grammar.
+		•	Outputs a hierarchical XML structure showing the parse tree.
+```
+
+*Jack grammar:*
+
+![Jack grammar 1](https://github.com/lukettoOoO/Nand2tetris/blob/177e07c173dc70dcd9961f466e4ace5060689ac9/Jack%20grammar%201.png)
+
+![Jack grammar 2](https://github.com/lukettoOoO/Nand2tetris/blob/177e07c173dc70dcd9961f466e4ace5060689ac9/Jack%20grammar%202.png)
+*from "The Elements of Computer Systems" by Noam Nisan and Shimon Schocken*
+
+*Example: tokenizing a directory of .jack files (classes)*
