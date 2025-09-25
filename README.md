@@ -298,9 +298,9 @@ The goal is to parse Jack source programs (.jack) and produce a structured repre
 
 *Jack grammar:*
 
-![Jack grammar 1](https://github.com/lukettoOoO/Nand2tetris/blob/177e07c173dc70dcd9961f466e4ace5060689ac9/Jack%20grammar%201.png)
+![Jack grammar 1](https://github.com/lukettoOoO/Nand2tetris/blob/c5c243f5db04857514cf89e1dea1c023b907bfee/Jack_grammar_1.png)
 
-![Jack grammar 2](https://github.com/lukettoOoO/Nand2tetris/blob/177e07c173dc70dcd9961f466e4ace5060689ac9/Jack%20grammar%202.png)
+![Jack grammar 2](https://github.com/lukettoOoO/Nand2tetris/blob/c5c243f5db04857514cf89e1dea1c023b907bfee/Jack_grammar_2.png)
 *from "The Elements of Computer Systems" by Noam Nisan and Shimon Schocken*
 
 *Example: tokenizing a directory of .jack files (classes)*
