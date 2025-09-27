@@ -183,15 +183,15 @@ M=M+1
 //return
 @LCL
 D=M
-@endFrame
+@R13
 M=D
 @5
 D=A
-@endFrame
+@R13
 A=M
 A=A-D
 D=M
-@retAddr
+@R14
 M=D
 @SP
 M=M-1
@@ -204,7 +204,7 @@ M=D
 D=M
 @SP
 M=D+1
-@endFrame
+@R13
 D=M
 @1
 D=D-A
@@ -212,7 +212,7 @@ A=D
 D=M
 @THAT
 M=D
-@endFrame
+@R13
 D=M
 @2
 D=D-A
@@ -220,7 +220,7 @@ A=D
 D=M
 @THIS
 M=D
-@endFrame
+@R13
 D=M
 @3
 D=D-A
@@ -228,7 +228,7 @@ A=D
 D=M
 @ARG
 M=D
-@endFrame
+@R13
 D=M
 @4
 D=D-A
@@ -236,6 +236,6 @@ A=D
 D=M
 @LCL
 M=D
-@retAddr
+@R14
 A=M
 0;JMP

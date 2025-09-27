@@ -1,5 +1,5 @@
 /*This is the Assembler for project 6 of the nand2tetris project. It does what it's supposed to do, the only things I did not manage to implement
-was whitespace removal, so the user can use indentation in the .asm files, and dynamic line sizes (the only thing
+was whitespace removal, so the user can't use indentation in the .asm files, and dynamic line sizes (the only thing
 that is dynamic is the symbol table). Except that, the program works with all the provided test files by nand2tetris.*/
 #include <stdio.h>
 #include <stdlib.h>

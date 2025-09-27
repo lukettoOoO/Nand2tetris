@@ -6,12 +6,12 @@
 // argument[0] and argument[1] must be set by the caller.
 
 function SimpleFunction.test 2
-	push local 0
-	push local 1
-	add
-	not
-	push argument 0
-	add
-	push argument 1
-	sub
-	return
+push local 0
+push local 1
+add
+not
+push argument 0
+add
+push argument 1
+sub
+return

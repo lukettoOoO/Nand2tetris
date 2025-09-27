@@ -1,0 +1,101 @@
+class Math {
+    
+    function int multiply(int x, int y) 
+    {
+        var int sum, i, neg;
+
+        let sum = 0;
+        let neg = 0; //0 - pos, 1 - neg (result)
+
+        if (x < 0) {
+            let x = -x;
+            let neg = 1 - neg;
+        }
+        if (y < 0) {
+            let y = -y;
+            let neg = 1 - neg;
+        }
+
+        let i = 0;
+        while (i < y) {
+            let sum = sum + x;
+            let i = i + 1;
+        }
+
+        if (neg = 1) {
+            let sum = -sum;
+        }
+
+        return sum;
+    }
+
+    function int divide(int x, int y) 
+    {
+        var int count, neg;
+        
+        let neg = 0; //0 - pos, 1 - neg (result)
+
+        if (x < 0) {
+            let x = -x;
+            let neg = 1 - neg;
+        }
+        if (y < 0) {
+            let y = -y;
+            let neg = 1 - neg;
+        }
+
+        let count = 0;
+        while (~(x < y)) {
+            let x = x - y;
+            let count = count + 1;
+        }
+
+        if (neg = 1) {
+            let count = -count;
+        }
+
+        return count;
+    }
+
+    function int sqrt(int x) 
+    {
+        var int last_i;
+        var int i;
+        var int end;
+        let end = x/2;
+        while (i<end){
+                if (((i * i) > x)|(i*i < 0)){return last_i;}
+                let last_i = i;
+                let i = i + 1;
+        }
+        return last_i;
+    }
+
+    function int abs(int x) 
+    {
+        if(x < 0) {
+            let x = -x;
+        }
+        return x;
+    }
+
+    function int min(int x, int y) 
+    {
+        if(x < y) {
+            return x;
+        }
+        else {
+            return y;
+        }
+    }
+
+    function int max(int x, int y) 
+    {
+        if(x > y) {
+            return x;
+        }
+        else {
+            return y;
+        }
+    }
+}
