@@ -304,3 +304,58 @@ The goal is to parse Jack source programs (.jack) and produce a structured repre
 *from "The Elements of Computer Systems" by Noam Nisan and Shimon Schocken*
 
 *Example: tokenizing a directory of .jack files (classes)*
+
+![Jack Analyzer](https://github.com/lukettoOoO/Nand2tetris/blob/78f726e24e3b7cc21603c5265c470f71eff9de4e/jack_analyzer.gif)
+
+### 11. Compiler II: Code Generation
+
+This chapter completes the Jack compiler.
+Building on the tokenizer and syntax analyzer from Chapter 10, we now generate VM code directly from Jack programs.
+Instead of producing XML, the compiler now emits stack-based VM instructions.
+```
+	•	Symbol tables — track variables, their types, kinds (static, field, argument, local), and memory segments.
+	•	Subroutine handling — compile function/method/constructor definitions with proper memory setup.
+	•	Expressions & statements — translate Jack constructs (if, while, do, let, return) into VM sequences.
+```
+
+Compiler components:
+```
+	•	SymbolTable
+		•	Maps identifiers to their kind, type, and index.
+		•	Supports class-level and subroutine-level scopes.
+	•	CompilationEngine
+		•	Now emits .vm code instead of XML.
+		•	Key methods compile:
+			•	Class declarations
+			•	Subroutine declarations (functions, methods, constructors)
+			•	Statements (let, if, while, do, return)
+			•	Expressions and terms
+	•	VMWriter
+		•	Utility that writes VM commands (push, pop, arithmetic, function call, return).
+	•	JackCompiler
+		•	Entry point that compiles one or more .jack files into corresponding .vm files.
+```
+
+*Example: Main.jack -> Main.vm*
+
+![Jack Compiler](https://github.com/lukettoOoO/Nand2tetris/blob/aaa982f86b345c568d83238edcb6ad7c630398ff/jack_compiler.gif)
+
+### 12. Operating System
+
+This final chapter is the implementation of a basic operating system in Jack.
+It provides the standard library needed to run Jack programs, so user applications don’t need to manage raw memory or I/O directly.
+The OS is written entirely in Jack, runs on top of the VM, and provides services such as math utilities, memory management, screen drawing, keyboard input, and string/array manipulation.
+
+*Note: for some classes of this chapter I used the code built by user woai3c - https://github.com/woai3c/nand2tetris*
+
+OS classes implemented:
+```
+	•	Math — multiplication, division, square root.
+	•	Memory — heap allocation (alloc) and recycling (deAlloc).
+	•	Array — array creation and disposal.
+	•	String — string construction, concatenation, character access.
+	•	Output — printing characters, strings, and numbers to the screen.
+	•	Screen — drawing pixels, lines, rectangles, and clearing the display.
+	•	Keyboard — reading keys and text input.
+	•	Sys — program startup (Sys.init), system functions like halt and wait.
+```
